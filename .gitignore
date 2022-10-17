@@ -13,7 +13,6 @@
 *.pch
 
 # Compiled Dynamic libraries
-*.so
 *.dylib
 *.dll
 
@@ -1226,3 +1225,4 @@ cython_debug/
 
 .idea
 .vscode
+*.mp4
