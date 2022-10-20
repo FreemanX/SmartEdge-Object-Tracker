@@ -4,7 +4,14 @@ import os
 API_HOST = "50pkh1qo9d.execute-api.us-east-1.amazonaws.com"
 API_KEY = os.getenv("API_KEY")
 
-BUCKET_NAME = "comp6733s-16.358376s145.787559"
+LATITUDE = "-16.358376"
+LONGITUDE = "145.787559"
+BUCKET_NAME = "comp6733s%ss%s" % (LATITUDE, LONGITUDE)
+
+def smartedge_filename(date, simple_filename):
+	if date.isdigit() != True or len(date) != 8:
+		raise Exception("expect date to be in the format of 20010203")
+	return "%s_%s" % (date, simple_filename)
 
 def upload_binary(filename, path):
 	with open(path, "rb") as f:
