@@ -4,7 +4,7 @@ import os
 API_HOST = "50pkh1qo9d.execute-api.us-east-1.amazonaws.com"
 API_KEY = os.getenv("API_KEY")
 
-BUCKET_NAME = "2022t3comp6733-smartedgebucket"
+BUCKET_NAME = "comp6733s-16.358376s145.787559"
 
 def upload_binary(filename, path):
 	with open(path, "rb") as f:
@@ -26,8 +26,3 @@ def upload_json(filename, json_str):
 
 	resp = conn.getresponse()
 	print(resp.status)
-
-
-upload_binary("test_image1.jpg", "/Users/yinlokwong/Desktop/310691998_443816850955288_4729957535753765889_n.png")
-payload = '{"test-field1": "test-data1", "test-field2": "test-data2"}'
-upload_json("test_json1.json", payload)
