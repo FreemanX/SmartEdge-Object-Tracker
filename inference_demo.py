@@ -19,7 +19,7 @@ CONF_THRESH = 0.3
 IOU_THRESHOLD = 0.3
 
 
-def plot_one_box(x, img, color=None, label=None, line_thickness=None):
+def plot_one_box(x, img, color=[0, 0, 255], label=None, line_thickness=None):
     """
     description: Plots one bounding box on image img,
                  this function comes from YoLov5 project.
@@ -477,7 +477,7 @@ class inferThreadCam(threading.Thread):
         if not video_file:
             self.cap = cv2.VideoCapture(gstreamer_pipeline())
         else:
-            self.cap = cv2.VideoCapture("./gbr_cots_video_all.mp4")
+            self.cap = cv2.VideoCapture(video_file)
 
 
     def run(self):
@@ -528,16 +528,14 @@ def gen_engine_model():
     trt_yolov5=f'{trt_path}/build/yolov5'
 
     print("Checking plugin lib...")
-    if not pathlib.Path(trt_so).is_file() or not pathlib.Path(trt_yolov5).is_file():
-        print(f"Building necessary library...")
-        pathlib.Path(f'{trt_path}/build').mkdir(parents=True, exist_ok=True)
-        cwd = os.getcwd()
-        os.chdir(f'{trt_path}/build')
-        os.system('cmake ..')
-        os.system('make')
-        os.chdir(cwd)
-    else:
-        print('[OK] Plugin files has been built.')
+    print(f"Building necessary library...")
+    pathlib.Path(f'{trt_path}/build').mkdir(parents=True, exist_ok=True)
+    cwd = os.getcwd()
+    os.chdir(f'{trt_path}/build')
+    os.system('cmake ..')
+    os.system('make')
+    os.chdir(cwd)
+    print('[OK] Plugin files has been built.')
     
     engine_file = f'./weights/{machine_id}.engine'
     print(f"Checking model file({engine_file})...")
@@ -567,11 +565,9 @@ if __name__ == "__main__":
             # create a new thread to do warm_up
             thread1 = warmUpThread(yolov5_wrapper)
             thread1.start()
+            thread1.join()
 
         infer_thread = inferThreadCam(yolov5_wrapper, video_file)
-
-        for i in range(10):
-            thread1.join()
 
         infer_thread.start()
         infer_thread.join()
