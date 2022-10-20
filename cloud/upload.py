@@ -9,8 +9,8 @@ LONGITUDE = "145.787559"
 BUCKET_NAME = "comp6733s%ss%s" % (LATITUDE, LONGITUDE)
 
 def smartedge_filename(date, simple_filename):
-	if date.isdigit() != True or len(date) != 8:
-		raise Exception("expect date to be in the format of 20010203")
+	if date.isdigit() != True or len(date) != 14:
+		raise Exception("expect date to be in the format of YYYYMMDDHHIISS")
 	return "%s_%s" % (date, simple_filename)
 
 def upload_binary(filename, path):

@@ -50,13 +50,13 @@ async def list_locations():
 	return resp
 
 @app.get("/{location}/data")
-def list_data(location, date: Union[str, None] = None):
+def list_data(location, datetime: Union[str, None] = None):
 	bucket_name = bucket_name_from_location(location)
 	try:
 		s3_bucket = s3_resource.Bucket(bucket_name)
 		objects = None
-		if date:
-			objects = s3_bucket.objects.filter(Prefix=date)
+		if datetime:
+			objects = s3_bucket.objects.filter(Prefix=datetime)
 		else:
 			objects = s3_bucket.objects.all()
 	except ClientError:
