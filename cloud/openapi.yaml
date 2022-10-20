@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: SmartEdge API - OpenAPI 3.0
+  version: 1.0.0
+servers:
+  - url: https://50pkh1qo9d.execute-api.us-east-1.amazonaws.com/v1
+paths:
+  /2022t3comp6733-smartedgebucket/{filename}:
+    put:
+      tags:
+        - bucket
+      summary: Upload a file
+      description: Update an existing pet by Id
+      operationId: PutObject
+      parameters:
+        - name: filename
+          in: path
+          description: filename
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: binary file or json in request payload
+        content:
+          image/*:    # Can be image/png, image/svg, image/gif, etc.
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              type: object
+              nullable: true
+      responses:
+        '200':
+          description: Successful operation
+      security:
+        - api_key: []
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-API-KEY
+      in: header
+
