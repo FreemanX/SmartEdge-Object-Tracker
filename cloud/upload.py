@@ -4,7 +4,14 @@ import os
 API_HOST = "50pkh1qo9d.execute-api.us-east-1.amazonaws.com"
 API_KEY = os.getenv("API_KEY")
 
-BUCKET_NAME = "2022t3comp6733-smartedgebucket"
+LATITUDE = "-16.358376"
+LONGITUDE = "145.787559"
+BUCKET_NAME = "comp6733s%ss%s" % (LATITUDE, LONGITUDE)
+
+def smartedge_filename(date, simple_filename):
+	if date.isdigit() != True or len(date) != 14:
+		raise Exception("expect date to be in the format of YYYYMMDDHHIISS")
+	return "%s_%s" % (date, simple_filename)
 
 def upload_binary(filename, path):
 	with open(path, "rb") as f:
@@ -26,8 +33,3 @@ def upload_json(filename, json_str):
 
 	resp = conn.getresponse()
 	print(resp.status)
-
-
-upload_binary("test_image1.jpg", "/Users/yinlokwong/Desktop/310691998_443816850955288_4729957535753765889_n.png")
-payload = '{"test-field1": "test-data1", "test-field2": "test-data2"}'
-upload_json("test_json1.json", payload)
