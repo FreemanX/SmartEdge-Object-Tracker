@@ -3,6 +3,7 @@ An example that uses TensorRT's Python api to make inferences.
 """
 import ctypes
 import os
+import pathlib
 import shutil
 import random
 import sys
@@ -18,7 +19,7 @@ CONF_THRESH = 0.3
 IOU_THRESHOLD = 0.3
 
 
-def plot_one_box(x, img, color=None, label=None, line_thickness=None):
+def plot_one_box(x, img, color=[0, 0, 255], label=None, line_thickness=None):
     """
     description: Plots one bounding box on image img,
                  this function comes from YoLov5 project.
@@ -476,7 +477,7 @@ class inferThreadCam(threading.Thread):
         if not video_file:
             self.cap = cv2.VideoCapture(gstreamer_pipeline())
         else:
-            self.cap = cv2.VideoCapture("./gbr_cots_video_all.mp4")
+            self.cap = cv2.VideoCapture(video_file)
 
 
     def run(self):
@@ -517,11 +518,38 @@ class warmUpThread(threading.Thread):
             )
         )
 
+def gen_engine_model():
+    machine_id = ''
+    with open('/etc/machine-id', 'r') as f:
+        machine_id = f.readline().strip()
+    assert len(machine_id) > 0
+    trt_path = './trt'
+    trt_so = f'{trt_path}/build/libmyplugins.so'
+    trt_yolov5=f'{trt_path}/build/yolov5'
+
+    print("Checking plugin lib...")
+    print(f"Building necessary library...")
+    pathlib.Path(f'{trt_path}/build').mkdir(parents=True, exist_ok=True)
+    cwd = os.getcwd()
+    os.chdir(f'{trt_path}/build')
+    os.system('cmake ..')
+    os.system('make')
+    os.chdir(cwd)
+    print('[OK] Plugin files has been built.')
+    
+    engine_file = f'./weights/{machine_id}.engine'
+    print(f"Checking model file({engine_file})...")
+    if not pathlib.Path(engine_file).is_file():
+        print(f"Building TensorRT model, this may take a while, please wait...")
+        os.system(f"{trt_yolov5} -s weights/yolov5n_720_cots_best.wts {engine_file} n")
+    else:
+        print('[OK] model file ready.')
+    
+    return trt_so, engine_file
 
 if __name__ == "__main__":
     # load custom plugin and engine
-    PLUGIN_LIBRARY = "./libs/libmyplugins.so" 
-    engine_file_path = "./weights/yolov5n_720_cots_best.engine" 
+    PLUGIN_LIBRARY, engine_file_path = gen_engine_model()
 
     video_file = sys.argv[1] if len(sys.argv) > 1 else None
 
@@ -537,11 +565,9 @@ if __name__ == "__main__":
             # create a new thread to do warm_up
             thread1 = warmUpThread(yolov5_wrapper)
             thread1.start()
+            thread1.join()
 
         infer_thread = inferThreadCam(yolov5_wrapper, video_file)
-
-        for i in range(10):
-            thread1.join()
 
         infer_thread.start()
         infer_thread.join()
