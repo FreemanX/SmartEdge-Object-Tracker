@@ -4,6 +4,7 @@ import os
 
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, Response
+from fastapi.responses import StreamingResponse
 from typing import Union
 
 S3_KEY_ID = os.getenv("S3_KEY_ID")
@@ -75,9 +76,21 @@ def get_object(location, key):
 		s3_bucket = s3_resource.Bucket(bucket_name)
 		s3_object = s3_bucket.Object(key)
 
-		body = s3_object.get()['Body'].read()
-		response = Response(content=body)
-		return response
+		if key.split(".")[-1] == "mp4":
+			return StreamingResponse(s3_object.get()["Body"], media_type="video/mp4")
+
+		body = s3_object.get()["Body"].read()
+		media_type = ""
+		if key.split(".")[-1] == "jpg":
+			media_type = "image/jpg"
+		elif key.split(".")[-1] == "jpeg":
+			media_type = "image/jpeg"
+		elif key.split(".")[-1] == "png":
+			media_type = "image/png"
+		else:
+			return Response(content=body)
+
+		return Response(content=body, media_type=media_type)
 	except ClientError:
 		logger.exception(
 			"Couldn't get object '%s' from bucket '%s'.",
