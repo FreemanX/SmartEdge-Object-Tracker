@@ -1228,3 +1228,4 @@ cython_debug/
 *.mp4
 .deta
 *.engine
+logs

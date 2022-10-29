@@ -127,29 +127,6 @@ def gstreamer_pipeline(
     )
 
 
-# def draw_keypoints_on_frame(keypoints, frame):
-#     return cv.drawKeypoints(frame, keypoints, np.array([]), (0, 0, 255), cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-def draw_cv_keypoints_on_frame(keypoints, img):
-    # tl = round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
-    tl = 1
-    img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
-    for kp in keypoints:
-        # color = [random.randint(0, 255) for _ in range(3)]
-        color = (0, 0, 255)
-        # c1 = (int(kp.pt[0] - kp.size / 2), int(kp.pt[1] - kp.size / 2))
-        # c2 = (int(kp.pt[0] + kp.size / 2), int(kp.pt[1] + kp.size / 2))
-        # img = cv.rectangle(img, c1, c2, color, thickness=tl, lineType=cv.LINE_AA)
-        img = cv.circle(img, (int(kp.pt[0]), int(kp.pt[1])), int(kp.size / 2), color, thickness=tl, lineType=cv.LINE_AA)
-        tf = max(tl - 1, 1)  # font thickness
-        t_size = cv.getTextSize("NG", 0, fontScale=tl / 3, thickness=tf)[0]
-        c1 = (int(kp.pt[0]), int(kp.pt[1] - kp.size / 2))
-        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
-        cv.rectangle(img, c1, c2, color, -1, cv.LINE_AA)
-        cv.putText(img, "NG", (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv.LINE_AA)
-    return img
-
-
 def cvt_cv_to_qt(cv_frame, scale_w=1280, scale_h=720) -> QImage:
     cv_frame_rgb = cv.cvtColor(cv_frame, cv.COLOR_BGR2RGB)
     h, w, ch = cv_frame_rgb.shape
