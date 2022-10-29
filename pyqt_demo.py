@@ -42,6 +42,7 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         BufferPackedResult.__init__(self)
         self.thread_run = True
         self.vid_mode = False
+        self.vid_file = vid_file
         if not vid_file:  # see if we want demo on a video file
             self.cap = cv.VideoCapture(gstreamer_pipeline())
         else:
@@ -61,7 +62,8 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             ret, frame = self.cap.read()
             if not ret and self.vid_mode:
                 Log.info(f"End of video reached, reset to the first frame.")
-                self.cap.set(cv.CAP_PROP_POS_FRAMES, 0)
+                self.cap.release()
+                self.cap = cv.VideoCapture(self.vid_file)
             elif not ret:
                 Log.warning("Failed to get video frame from camera. Retrying...")
                 continue
@@ -76,6 +78,7 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             frame_text = f"COTS: {results['n_objects']}; FPS: {round(1/results['inference_time'])};"
             out_frame = add_text_to_frame(out_frame, frame_text)
             self.sig_source.emit(cvt_cv_to_qt(out_frame))
+        self.cap.release()
 
 
 class DetectorApp(UI.Ui_MainWindow):
