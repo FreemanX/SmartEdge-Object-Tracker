@@ -67,6 +67,8 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             elif not ret:
                 Log.warning("Failed to get video frame from camera. Retrying...")
                 continue
+            if frame is None:
+                continue
 
             results = self.inf_bkend.inference(frame)
             # copy an instance for display
