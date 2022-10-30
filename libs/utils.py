@@ -139,5 +139,5 @@ def cvt_cv_to_qt(cv_frame, scale_w=1280, scale_h=720) -> QImage:
 
 def add_text_to_frame(frame, text: str):
     for idx, d_str in enumerate(text.split(';')):
-        cv.putText(frame, d_str, (10, 50 + 50 * idx), cv.FONT_HERSHEY_SIMPLEX, .6, (0, 0, 255), 2)
+        cv.putText(frame, d_str, (10, 50 + 30 * idx), cv.FONT_HERSHEY_SIMPLEX, .8, (0, 0, 255), 2)
     return frame

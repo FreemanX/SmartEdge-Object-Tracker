@@ -65,7 +65,8 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
                 self.cap.release()
                 self.cap = cv.VideoCapture(self.vid_file)
             elif not ret:
-                Log.warning("Failed to get video frame from camera. Retrying...")
+                Log.warning(
+                    "Failed to get video frame from camera. Retrying...")
                 continue
             if frame is None:
                 continue
@@ -107,7 +108,8 @@ class DetectorApp(UI.Ui_MainWindow):
         self.fpe.sig_source.connect(self.update_pp_to_ui)
 
     def update_pp_to_ui(self, img):  # update processed frame to ui
-        self.label_camview.setPixmap(QPixmap.fromImage(img))
+        scaled = QPixmap.fromImage(img).scaled(1600, 900)
+        self.label_camview.setPixmap(scaled)
         self.process_results()
 
     def process_results(self):
@@ -119,10 +121,13 @@ class DetectorApp(UI.Ui_MainWindow):
             return
         # Example: show info on status bar.
         pad_size = 35
-        msg_str = f"FPS: {round(1 / results['inference_time'])}, ".ljust(pad_size)
-        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms, ".ljust(pad_size)
-        msg_str += f"Num COTS: {round(results['n_objects'])}, ".ljust(pad_size)
-        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
+        msg_str = f"FPS: {round(1 / results['inference_time'])} ".ljust(
+            pad_size)
+        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(
+            pad_size)
+        msg_str += f"Num COTS: {round(results['n_objects'])} ".ljust(pad_size)
+        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(
+            pad_size)
         self.statusbar.showMessage(msg_str)
 
     def ask_stop_app(self, event):
@@ -153,6 +158,7 @@ class DetectorApp(UI.Ui_MainWindow):
         _exit_code = self.qt_app.exec_()
         self.exit_procedure()
         return _exit_code
+
 
 if __name__ == '__main__':
     video_file = sys.argv[1] if len(sys.argv) > 1 else None
