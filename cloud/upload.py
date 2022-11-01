@@ -1,12 +1,10 @@
 import http.client
 import os
 
-API_HOST = "50pkh1qo9d.execute-api.us-east-1.amazonaws.com"
+API_HOST = "rhz3bho1fk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = os.getenv("API_KEY")
 
-LATITUDE = "-16.358376"
-LONGITUDE = "145.787559"
-BUCKET_NAME = "comp6733s%ss%s" % (LATITUDE, LONGITUDE)
+BUCKET_NAME = "2022t3comp6733-smartedgebucket"
 
 def smartedge_filename(datetime, simple_filename):
 	if datetime.isdigit() != True or len(datetime) != 14:
