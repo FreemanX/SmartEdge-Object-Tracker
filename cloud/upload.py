@@ -20,15 +20,8 @@ def upload_binary(filename, path):
 		resp = conn.getresponse()
 		print(resp.status)
 
-def _upload_json(filename, json_str):
-	conn = http.client.HTTPSConnection(API_HOST)
+def meta_filename(trip_name):
+	return "%s_%s_meta.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"))
 
-	headers = { 'X-API-KEY': API_KEY }
-	conn.request("PUT", "/v1/%s/%s" % (BUCKET_NAME, filename), json_str, headers)
-
-	resp = conn.getresponse()
-	print(resp.status)
-
-def upload_trip_meta(trip_name, data_json):
-	filename = "%s_%s_meta.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"))
-	_upload_json(filename, data_json)
+def filename(trip_name, filename):
+	return "%s_%s_%s" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"), filename)
