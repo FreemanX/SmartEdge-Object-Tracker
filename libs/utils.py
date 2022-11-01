@@ -70,7 +70,7 @@ def get_all_files(dir_path: str):
 
 # time related
 _DATE_FORMAT = '%Y%m%d %H:%M:%S'
-_FILE_DATE_FORMAT = '%Y%m%d_%H%M%S'
+_FILE_DATE_FORMAT = '%Y%m%d%H%M%S'
 
 
 def cvt_to_date_fmt(time_value):
