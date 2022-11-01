@@ -1,15 +1,12 @@
 import http.client
 import os
 
+from datetime import datetime
+
 API_HOST = "rhz3bho1fk.execute-api.ap-southeast-2.amazonaws.com"
 API_KEY = os.getenv("API_KEY")
 
 BUCKET_NAME = "2022t3comp6733-smartedgebucket"
-
-def smartedge_filename(datetime, simple_filename):
-	if datetime.isdigit() != True or len(datetime) != 14:
-		raise Exception("expect date to be in the format of YYYYMMDDHHIISS")
-	return "%s_%s" % (datetime, simple_filename)
 
 def upload_binary(filename, path):
 	with open(path, "rb") as f:
@@ -23,7 +20,7 @@ def upload_binary(filename, path):
 		resp = conn.getresponse()
 		print(resp.status)
 
-def upload_json(filename, json_str):
+def _upload_json(filename, json_str):
 	conn = http.client.HTTPSConnection(API_HOST)
 
 	headers = { 'X-API-KEY': API_KEY }
@@ -31,3 +28,7 @@ def upload_json(filename, json_str):
 
 	resp = conn.getresponse()
 	print(resp.status)
+
+def upload_trip_meta(trip_name, data_json):
+	filename = "%s_%s_meta.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"))
+	_upload_json(filename, data_json)
