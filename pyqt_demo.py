@@ -154,6 +154,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
+        # TODO
         self.capture_a_frame = True
 
     def on_start_clicked(self):
@@ -259,6 +260,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             )
             # save labels
             # TODO: save temperature and related stat
+
             with open(f'{self.trip_dir}/{file_prefix}.txt', 'w') as f:
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
