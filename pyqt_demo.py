@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QMessageBox, QDialog
 
 import pyqt_demo_ui as UI
 from new_trip import NewTripDialog
+from upload_trip import UploadTripDialog
 
 from cloud.upload import *
 from inference_backend import *
@@ -148,6 +149,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_start.clicked.connect(self.on_start_clicked)
         self.pushButton_capture.clicked.connect(self.on_capture_clicked)
         self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
+        self.pushButton_upload.clicked.connect(self.on_upload_clicked)
             
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
@@ -202,6 +204,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.horizontalScrollBar_sensitivity.setEnabled(True)
             self.pushButton_start.setEnabled(True)
             self.pushButton_capture.setEnabled(True)
+    
+    def on_upload_clicked(self):
+        self.uploadTripDialog = UploadTripDialog()
+        result = self.uploadTripDialog.exec()
+        if result == QDialog.Accepted:
+            pass
 
     def on_sensitivity_change(self):
         conf_val = (100 - self.horizontalScrollBar_sensitivity.value()) / 100
