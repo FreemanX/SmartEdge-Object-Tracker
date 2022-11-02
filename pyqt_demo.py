@@ -152,10 +152,10 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
-        # TODO
         self.capture_a_frame = True
 
     def on_start_clicked(self):
+        self.save_metadata()
         self.fpe.start_detection = not self.fpe.start_detection
         self.update_start_button()
         self.pushButton_new_trip.setEnabled(not self.fpe.start_detection)
@@ -163,7 +163,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.horizontalScrollBar_sensitivity.setEnabled(self.fpe.start_detection)
         self.pushButton_start.setEnabled(self.fpe.start_detection)
         self.pushButton_capture.setEnabled(self.fpe.start_detection)
-        if not self.fpe.start_detection:
+
+    def save_metadata(self):
+        if self.fpe.start_detection:
             json_filename = "%s_%s_meta.json" % (self.trip_name, self.start_trip_time)
             with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
                 json.dump(self.metadata, outfile)
@@ -248,6 +250,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
                 results['raw_frame']
             )
             # save labels
+            # TODO: save temperature and related stat
             with open(f'{self.trip_dir}/{file_prefix}.txt', 'w') as f:
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
@@ -281,7 +284,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             event.ignore()
 
     def exit_procedure(self):
-        # TODO: save metadata
+        self.save_metadata()
         Log.info(f"Exiting procedure in prrogress...")
         self.inference_backend.release_resrouce()
         self.fpe.thread_run = False
