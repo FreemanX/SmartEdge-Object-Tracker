@@ -372,7 +372,7 @@ color: rgb(255, 255, 255);</string>
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(, 215, 207);</string>
+     <string notr="true">background-color: rgb(211, 215, 207);</string>
     </property>
     <property name="text">
      <string/>
