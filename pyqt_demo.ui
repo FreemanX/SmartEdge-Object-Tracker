@@ -268,6 +268,48 @@ color: rgb(255, 255, 255);</string>
       <height>80</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QScrollBar:horizontal {
+  border-radius:6px;
+  border-color: none;
+  border-width: 1px;
+  border-style: solid;
+  background-color: rgba(255, 255, 255,200);
+  width: 1px;
+  margin: 0px 10px 0 10px;
+ }
+
+ QScrollBar::handle:horizontal {
+	border-radius:14px;
+    /*  background-color: rgba(16, 104, 106,200); */
+	
+	background-color: rgb(52, 101, 164);
+
+    min-height: 30px;
+	min-width: 45px;
+ }
+QScrollBar::add-line:horizontal {
+    border: 1px;
+	border-radius:5px;
+    /* background-color: rgb(76, 178, 158); */
+	
+	background-color: rgb(32, 74, 135);
+    width: 10px;
+    subcontrol-position: right;
+	subcontrol-origin: margin;
+ }
+
+ QScrollBar::sub-line:horizontal {
+  border: 1px;
+	border-radius:5px;
+    /* background-color: rgb(76, 178, 158); */
+	
+	background-color: rgb(32, 74, 135);
+    width: 10px;
+    subcontrol-position: left;
+	subcontrol-origin: margin;  
+ }</string>
+    </property>
     <property name="minimum">
      <number>1</number>
     </property>
