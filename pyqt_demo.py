@@ -3,12 +3,16 @@ import sys
 import numpy as np
 import queue
 import typing
+import json
+from datetime import datetime
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QDialog
 
 import pyqt_demo_ui as UI
+from new_trip import NewTripDialog
+
 from cloud.upload import *
 from inference_backend import *
 from libs.utils import *
@@ -113,13 +117,24 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.capture_a_frame = False
         self.inference_backend = InferenceBackend()
         self.fpe = FrameProcessingEngine(self.inference_backend, video_file)
+        self.metadata = {}
+        self.start_trip_time = ''
+        self.trip_root_dir = 'trips'
+        self.trip_name = 'trip'
 
         self.set_ui_init_values()
+        self.set_ui_init_behaviour()
         self.set_ui_actions()
 
     def set_ui_init_values(self):
+        self.inference_backend.set_confidence(0.9) 
         self.update_sensitivity_label()
         self.update_start_button()
+
+    def set_ui_init_behaviour(self):
+        self.pushButton_start.setEnabled(False)
+        self.pushButton_capture.setEnabled(False)
+        self.horizontalScrollBar_sensitivity.setEnabled(False)
 
     def set_ui_actions(self):
         # ---------  Sample Action
@@ -132,21 +147,59 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.on_sensitivity_change)
         self.pushButton_start.clicked.connect(self.on_start_clicked)
         self.pushButton_capture.clicked.connect(self.on_capture_clicked)
-        
+        self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
+            
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
+        # TODO
         self.capture_a_frame = True
 
     def on_start_clicked(self):
         self.fpe.start_detection = not self.fpe.start_detection
         self.update_start_button()
+        self.pushButton_new_trip.setEnabled(not self.fpe.start_detection)
+        self.pushButton_upload.setEnabled(not self.fpe.start_detection)
+        self.horizontalScrollBar_sensitivity.setEnabled(self.fpe.start_detection)
+        self.pushButton_start.setEnabled(self.fpe.start_detection)
+        self.pushButton_capture.setEnabled(self.fpe.start_detection)
+        if not self.fpe.start_detection:
+            json_filename = "%s_%s_meta.json" % (self.trip_name, self.start_trip_time)
+            with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
+                json.dump(self.metadata, outfile)
+            self.metadata = {}
+            self.label_camview.clear()
+            self.statusbar.showMessage('')
+            self.label_camview.setText('Camera View')
 
     def update_start_button(self):
         if self.fpe.start_detection:
             self.pushButton_start.setText("Stop")
         else:
             self.pushButton_start.setText("Start")
+    
+    def on_new_trip_clicked(self):
+        self.newTripDialog = NewTripDialog()
+        result = self.newTripDialog.exec()
+        if result == QDialog.Accepted:
+            self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
+            self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
+            self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
+            # create trip dir
+            # TODO: testing only, change to trip dir later
+            self.metadata = {}
+            self.trip_root_dir = 'trips'
+            self.trip_name = 'trip'
+            count = 1
+            while path_exist("%s/%s_%s" %(self.trip_root_dir, self.trip_name, self.start_trip_time)):
+                self.trip_name += str(count)
+                count += 1
+            self.trip_dir = "%s/%s_%s" %(self.trip_root_dir, self.trip_name, self.start_trip_time)
+            create_dir_if_not_exists(self.trip_dir)
+
+            self.horizontalScrollBar_sensitivity.setEnabled(True)
+            self.pushButton_start.setEnabled(True)
+            self.pushButton_capture.setEnabled(True)
 
     def on_sensitivity_change(self):
         conf_val = (100 - self.horizontalScrollBar_sensitivity.value()) / 100
@@ -160,9 +213,10 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.label_sensitivity.setText(f"{scroll_bar_value}")
 
     def update_pp_to_ui(self, img):  # update processed frame to ui
-        scaled = QPixmap.fromImage(img).scaled(1600, 900)
-        self.label_camview.setPixmap(scaled)
-        self.process_results()
+        if self.fpe.start_detection:
+            scaled = QPixmap.fromImage(img).scaled(1600, 900)
+            self.label_camview.setPixmap(scaled)
+            self.process_results()
 
     def process_results(self):
         """
@@ -180,31 +234,27 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.statusbar.showMessage(msg_str)
 
         # ---------- Handle image saving -----------
-        # TODO: testing only, change to trip dir later
-        trip_dir = 'trips/test_trip'
-        trip_name = 'test_trip'
-        create_dir_if_not_exists(trip_dir)  
         # save processed frame
-        # file_prefix = filename(trip_name, str(round(time.time())) + '_')  # TODO: use this in real use
-        file_prefix = f"{trip_name}_20221101224503" # TODO: testing only, to be deleted
+        #file_prefix = filename(self.trip_name, str(round(time.time())) + '_')  # TODO: use this in real use
+        file_prefix = f"{self.trip_name}_{self.start_trip_time}_{str(round(time.time()))}"
         if self.fpe.start_detection and results['n_objects'] > 0:
             cv.imwrite(
-                f"{trip_dir}/{file_prefix}_processed.jpg",
+                f"{self.trip_dir}/{file_prefix}_processed.jpg",
                 results['out_frame']
             )
             # save raw frame
             cv.imwrite(
-                f"{trip_dir}/{file_prefix}.jpg",
+                f"{self.trip_dir}/{file_prefix}.jpg",
                 results['raw_frame']
             )
             # save labels
-            with open(f'{trip_dir}/{file_prefix}.txt', 'w') as f:
+            with open(f'{self.trip_dir}/{file_prefix}.txt', 'w') as f:
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
         
         if self.fpe.start_detection and self.capture_a_frame:
             cv.imwrite(
-                f"{trip_dir}/{file_prefix}_captured.jpg",
+                f"{self.trip_dir}/{file_prefix}_captured.jpg",
                 results['raw_frame']
             )
             self.capture_a_frame = False
@@ -215,6 +265,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.put(results)
 
     def ask_stop_app(self, event):
+        # TODO: Skip ask if haven't started new trip
+        # TODO: QMessageBox button size
         msg = QMessageBox()
         msg.setWindowTitle("Exit?")
         msg.setText("Confirm exit this application?")
@@ -229,6 +281,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             event.ignore()
 
     def exit_procedure(self):
+        # TODO: save metadata
         Log.info(f"Exiting procedure in prrogress...")
         self.inference_backend.release_resrouce()
         self.fpe.thread_run = False
