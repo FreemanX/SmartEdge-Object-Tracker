@@ -20,8 +20,8 @@ def upload_binary(filename, path):
 		resp = conn.getresponse()
 		print(resp.status)
 
-def meta_filename(trip_name):
-	return "%s_%s_meta.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"))
+def meta_filename(trip_name, latitude, longitude):
+	return "meta_%s_%s_%s_%s.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"), latitude, longitude)
 
 def filename(trip_name, filename):
 	return "%s_%s_%s" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"), filename)
