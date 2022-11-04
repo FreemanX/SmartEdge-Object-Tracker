@@ -10,7 +10,6 @@ paths:
       tags:
         - bucket
       summary: Upload a file
-      description: Update an existing pet by Id
       operationId: PutObject
       parameters:
         - name: filename
