@@ -20,6 +20,11 @@ def upload_binary(filename, path):
 		resp = conn.getresponse()
 		print(resp.status)
 
+def zip_filename(filename):
+	if filename.endswith(".zip") != True:
+		filename += ".zip"
+	return "zip_%s" % (filename)
+
 def meta_filename(trip_name, latitude, longitude):
 	return "meta_%s_%s_%s_%s.json" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"), latitude, longitude)
 
