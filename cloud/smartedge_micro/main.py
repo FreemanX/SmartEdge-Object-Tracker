@@ -2,10 +2,9 @@ import boto3
 import logging
 import os
 
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError
 from fastapi import FastAPI, Response
 from fastapi.responses import StreamingResponse
-from typing import Union
 
 S3_KEY_ID = os.getenv("S3_KEY_ID")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
@@ -13,88 +12,125 @@ S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
 app = FastAPI()
 logger = logging.getLogger(__name__)
 
-s3_client = boto3.client(
-	"s3",
-	aws_access_key_id=S3_KEY_ID,
-	aws_secret_access_key=S3_SECRET_KEY,
-)
 s3_resource = boto3.resource(
 	"s3",
 	aws_access_key_id=S3_KEY_ID,
 	aws_secret_access_key=S3_SECRET_KEY,
 )
 
-BUCKET_PREFIX = "comp6733"
+BUCKET_NAME = "2022t3comp6733-smartedge"
 
-def bucket_name_from_location(location):
-	location = location.replace("_", "s")
-	return "%ss%s" % (BUCKET_PREFIX, location)
+META_FILE_EXT = ".json"
 
 @app.get("/health")
 async def health_check():
-    return {"status": "OK"}
+	return {"status": "OK"}
 
-@app.get("/locations")
-async def list_locations():
+@app.get("/trips")
+async def list_trips():
+	bucket = None
 	try:
-		buckets_resp = s3_client.list_buckets()
+		bucket = s3_resource.Bucket(BUCKET_NAME)
 	except ClientError:
-		logger.exception("Couldn't list buckets.")
+		logger.exception("Couldn't get bucket.")
+		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for bucket.")
 		raise
 
-	resp = {"locations": []}
-	for bucket in buckets_resp["Buckets"]:
-		name_parts = bucket["Name"].split("s")
-		if name_parts[0] == BUCKET_PREFIX:
-			resp["locations"].append("%s_%s" % (name_parts[1], name_parts[2]))
+	meta_objects = None
+	try:
+		meta_objects = bucket.objects.filter(Prefix="meta_")
+	except ClientError:
+		logger.exception("Couldn't list meta objects.")
+		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for listing meta objects.")
+		raise
 
+	resp = {"data": []}
+	for obj in meta_objects:
+		parts = obj.key.split("_")
+		if len(parts) != 5:
+			continue # skip on unexpected filename
+		if parts[4].endswith(META_FILE_EXT) != True:
+			continue # skip on unexpected filename
+		trip_name = parts[1]
+		dt = parts[2]
+		lat = parts[3]
+		long = parts[4].strip(META_FILE_EXT)
+		resp["data"].append({
+			"name": trip_name,
+			"datetime": dt,
+			"latitude": lat,
+			"longitude": long,
+		})
 	return resp
 
-@app.get("/{location}/data")
-def list_data(location, datetime: Union[str, None] = None):
-	bucket_name = bucket_name_from_location(location)
+@app.get("/trips/{trip}/data")
+def list_data(trip):
+	bucket = None
 	try:
-		s3_bucket = s3_resource.Bucket(bucket_name)
-		objects = None
-		if datetime:
-			objects = s3_bucket.objects.filter(Prefix=datetime)
-		else:
-			objects = s3_bucket.objects.all()
+		bucket = s3_resource.Bucket(BUCKET_NAME)
 	except ClientError:
-		logger.exception("Couldn't list objects in bucket %s." % (bucket_name))
+		logger.exception("Couldn't get bucket.")
+		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for bucket.")
+		raise
 
+	objects = None
+	prefix = f"{trip}_"
+	try:
+		objects = bucket.objects.filter(Prefix=prefix)
+	except ClientError:
+		logger.exception(f"Couldn't list objects after {prefix}.")
+		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for listing objects.")
+		raise
+	
 	resp = {"data": []}
 	for object in objects:
 		resp["data"].append(object.key)
 	
 	return resp
 
-@app.get("/{location}/data/{key}")
-def get_object(location, key):
-	bucket_name = bucket_name_from_location(location)
+
+@app.get("/data/{key}")
+def get_object(key):
+	bucket = None
 	try:
-		s3_bucket = s3_resource.Bucket(bucket_name)
-		s3_object = s3_bucket.Object(key)
-
-		if key.split(".")[-1] == "mp4":
-			return StreamingResponse(s3_object.get()["Body"], media_type="video/mp4")
-
-		body = s3_object.get()["Body"].read()
-		media_type = ""
-		if key.split(".")[-1] == "jpg":
-			media_type = "image/jpg"
-		elif key.split(".")[-1] == "jpeg":
-			media_type = "image/jpeg"
-		elif key.split(".")[-1] == "png":
-			media_type = "image/png"
-		else:
-			return Response(content=body)
-
-		return Response(content=body, media_type=media_type)
+		bucket = s3_resource.Bucket(BUCKET_NAME)
 	except ClientError:
-		logger.exception(
-			"Couldn't get object '%s' from bucket '%s'.",
-			s3_object.key,
-			s3_bucket.name,
-		)
+		logger.exception("Couldn't get bucket.")
 		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for bucket.")
+		raise
+
+	object = None
+	try:
+		object = bucket.Object(key)
+	except ClientError:
+		logger.exception(f"Couldn't get {key}.")
+		raise
+	except NoCredentialsError:
+		logger.exception("No credentials for getting object.")
+		raise
+
+	if key.split(".")[-1] == "mp4":
+		return StreamingResponse(object.get()["Body"], media_type="video/mp4")
+
+	body = object.get()["Body"].read()
+	media_type = ""
+	if key.split(".")[-1] == "jpg":
+		media_type = "image/jpg"
+	elif key.split(".")[-1] == "jpeg":
+		media_type = "image/jpeg"
+	elif key.split(".")[-1] == "png":
+		media_type = "image/png"
+	else:
+		return Response(content=body)
+
+	return Response(content=body, media_type=media_type)
