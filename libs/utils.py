@@ -9,6 +9,7 @@ import cv2 as cv
 import psutil
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage
+import random 
 
 
 # system related
@@ -141,3 +142,11 @@ def add_text_to_frame(frame, text: str):
     for idx, d_str in enumerate(text.split(';')):
         cv.putText(frame, d_str, (10, 50 + 30 * idx), cv.FONT_HERSHEY_SIMPLEX, .8, (0, 0, 255), 2)
     return frame
+
+# statistic detail
+alpha = 0.01
+def get_initial_temperature():
+    return random.randrange(150, 250) / 10
+
+def get_next_temperature(current_temp):
+    return current_temp * (1-alpha) + random.randrange(100, 300)/10 * alpha

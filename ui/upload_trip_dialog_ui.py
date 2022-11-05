@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'upload_trip_dialog.ui'
+# Form implementation generated from reading ui file './ui/upload_trip_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -70,7 +70,7 @@ class Ui_NewTripDialog(object):
         NewTripDialog.setWindowTitle(_translate("NewTripDialog", "Dialog"))
         self.label_header.setText(_translate("NewTripDialog", "Upload Trip"))
         self.label_upload.setText(_translate("NewTripDialog", "Uploading"))
-        self.tableWidget.setSortingEnabled(True)
+        self.tableWidget.setSortingEnabled(False)
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("NewTripDialog", "Date"))
 

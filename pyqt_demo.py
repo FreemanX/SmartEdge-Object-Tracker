@@ -11,13 +11,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox, QDialog
 
 import pyqt_demo_ui as UI
-from new_trip import NewTripDialog
-from upload_trip import UploadTripDialog
 
 from cloud.upload import *
 from inference_backend import *
 from libs.utils import *
 from libs.Log import Log
+
+from ui.new_trip import NewTripDialog
+from ui.upload_trip import UploadTripDialog
 
 
 class BufferPackedResult:
@@ -39,71 +40,6 @@ class BufferPackedResult:
         except queue.Empty:
             return False, {}
 
-
-class FrameProcessingEngine(QThread, BufferPackedResult):
-    sig_source = pyqtSignal(QImage)
-
-    def __init__(self, inference_backend: InferenceBackend, vid_file: None):
-        QThread.__init__(self)
-        BufferPackedResult.__init__(self)
-        self.thread_run = True
-        self.vid_mode = False
-        self.vid_file = vid_file
-        if not vid_file:  # see if we want demo on a video file
-            self.cap = cv.VideoCapture(gstreamer_pipeline())
-        else:
-            self.cap = cv.VideoCapture(vid_file)
-            if not self.cap.isOpened():
-                Log.error(f"Failed to open video file {vid_file}!")
-                raise Exception(f"Failed to open video file {vid_file}!")
-            self.vid_mode = True
-        self.frame_width = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)
-        self.frame_height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
-
-        self.inf_bkend = inference_backend
-        self.start_detection = False
-
-    def run(self):  # Implement QThread function
-        while self.thread_run:
-            timer = time.time()
-            ret, frame = self.cap.read()
-            if not ret and self.vid_mode:
-                Log.info(f"End of video reached, reset to the first frame.")
-                self.cap.release()
-                self.cap = cv.VideoCapture(self.vid_file)
-            elif not ret:
-                Log.warning(
-                    "Failed to get video frame from camera. Retrying...")
-                continue
-            if frame is None:
-                continue
-            raw_frame = frame.copy()
-            if self.start_detection:
-                results = self.inf_bkend.inference(frame)
-            else:
-                results = {
-                    'out_frame': frame,
-                    'inference_time': 0,
-                    'n_objects': 0,
-                    'boxes': []
-                }
-            # copy an instance for display
-            out_frame = results['out_frame'].copy()
-            results['raw_frame'] = raw_frame
-            results['total_time'] = time.time() - timer
-            try:
-                results['fps'] = round(1/results['inference_time']) if self.start_detection else 0
-            except ZeroDivisionError:  # just be safe
-                results['fps'] = 0
-            self.put(results)
-            # ; separated text, ; is line separator.
-            if self.start_detection:
-                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']};"
-                out_frame = add_text_to_frame(out_frame, frame_text)
-            self.sig_source.emit(cvt_cv_to_qt(out_frame))
-        self.cap.release()
-
-
 class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def __init__(self, video_file: None):
         BufferPackedResult.__init__(self)
@@ -117,7 +53,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
         self.capture_a_frame = False
         self.inference_backend = InferenceBackend()
-        self.fpe = FrameProcessingEngine(self.inference_backend, video_file)
+        self.current_temperature = get_initial_temperature()
+        self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
         self.metadata = {}
         self.start_trip_time = ''
         self.trip_root_dir = 'trips'
@@ -169,7 +106,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
     def save_metadata(self):
         if self.fpe.start_detection:
-            json_filename = "%s_%s_meta.json" % (self.trip_name, self.start_trip_time)
+            json_filename = "meta_%s_%s_%s_%s.json" % (self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
             with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
                 json.dump(self.metadata, outfile)
             self.metadata = {}
@@ -187,18 +124,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.newTripDialog = NewTripDialog()
         result = self.newTripDialog.exec()
         if result == QDialog.Accepted:
+            self.metadata = {}            
             self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
             self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
             self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
-            # create trip dir
-            # TODO: testing only, change to trip dir later
-            self.metadata = {}
             self.trip_root_dir = 'trips'
             self.trip_name = 'trip'
-            count = 1
-            while path_exist("%s/%s_%s" %(self.trip_root_dir, self.trip_name, self.start_trip_time)):
-                self.trip_name += str(count)
-                count += 1
             self.trip_dir = "%s/%s_%s" %(self.trip_root_dir, self.trip_name, self.start_trip_time)
             create_dir_if_not_exists(self.trip_dir)
 
@@ -246,9 +177,11 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
         # ---------- Handle image saving -----------
         # save processed frame
-        #file_prefix = filename(self.trip_name, str(round(time.time())) + '_')  # TODO: use this in real use
-        file_prefix = f"{self.trip_name}_{self.start_trip_time}_{str(round(time.time()))}"
+        currentTime = str(round(100 * time.time()))
+        file_prefix = f"{self.trip_name}_{self.start_trip_time}_{currentTime}"
+        saveSensorData = False
         if self.fpe.start_detection and results['n_objects'] > 0:
+            saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_processed.jpg",
                 results['out_frame']
@@ -259,13 +192,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
                 results['raw_frame']
             )
             # save labels
-            # TODO: save temperature and related stat
-
             with open(f'{self.trip_dir}/{file_prefix}.txt', 'w') as f:
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
         
         if self.fpe.start_detection and self.capture_a_frame:
+            saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_captured.jpg",
                 results['raw_frame']
@@ -274,6 +206,11 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.pushButton_capture.setEnabled(True)
             self.pushButton_capture.setText("Capture")
         # ---------- End Handle image saving -----------
+
+        # Save sensor data into metadata
+        if saveSensorData:
+            self.metadata[currentTime] = {}
+            self.metadata[currentTime]['temperature'] = round(self.current_temperature, 1)
 
         self.put(results)
 
@@ -309,6 +246,70 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.exit_procedure()
         return _exit_code
 
+class FrameProcessingEngine(QThread, BufferPackedResult):
+    sig_source = pyqtSignal(QImage)
+
+    def __init__(self, inference_backend: InferenceBackend, detector: DetectorApp, vid_file: None):
+        QThread.__init__(self)
+        BufferPackedResult.__init__(self)
+        self.thread_run = True
+        self.vid_mode = False
+        self.vid_file = vid_file
+        if not vid_file:  # see if we want demo on a video file
+            self.cap = cv.VideoCapture(gstreamer_pipeline())
+        else:
+            self.cap = cv.VideoCapture(vid_file)
+            if not self.cap.isOpened():
+                Log.error(f"Failed to open video file {vid_file}!")
+                raise Exception(f"Failed to open video file {vid_file}!")
+            self.vid_mode = True
+        self.frame_width = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)
+        self.frame_height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
+
+        self.inf_bkend = inference_backend
+        self.start_detection = False
+        self.detector = detector
+
+    def run(self):  # Implement QThread function
+        while self.thread_run:
+            timer = time.time()
+            ret, frame = self.cap.read()
+            if not ret and self.vid_mode:
+                Log.info(f"End of video reached, reset to the first frame.")
+                self.cap.release()
+                self.cap = cv.VideoCapture(self.vid_file)
+            elif not ret:
+                Log.warning(
+                    "Failed to get video frame from camera. Retrying...")
+                continue
+            if frame is None:
+                continue
+            raw_frame = frame.copy()
+            if self.start_detection:
+                results = self.inf_bkend.inference(frame)
+            else:
+                results = {
+                    'out_frame': frame,
+                    'inference_time': 0,
+                    'n_objects': 0,
+                    'boxes': []
+                }
+            # copy an instance for display
+            out_frame = results['out_frame'].copy()
+            results['raw_frame'] = raw_frame
+            results['total_time'] = time.time() - timer
+            try:
+                results['fps'] = round(1/results['inference_time']) if self.start_detection else 0
+            except ZeroDivisionError:  # just be safe
+                results['fps'] = 0
+            self.put(results)
+            # ; separated text, ; is line separator.
+            if self.start_detection:
+                self.detector.current_temperature = get_next_temperature(self.detector.current_temperature)
+                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']}; Temperature: {round(self.detector.current_temperature, 1)}"
+                out_frame = add_text_to_frame(out_frame, frame_text)
+            self.sig_source.emit(cvt_cv_to_qt(out_frame))
+        self.cap.release()
 
 if __name__ == '__main__':
     video_file = sys.argv[1] if len(sys.argv) > 1 else None

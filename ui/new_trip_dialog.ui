@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1079</width>
-    <height>421</height>
+    <height>340</height>
    </rect>
   </property>
   <property name="font">
@@ -25,48 +25,11 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_latitude">
-     <property name="text">
-      <string>Latitude</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="1">
     <widget class="QLineEdit" name="lineEdit_longitude"/>
    </item>
    <item row="1" column="1">
     <widget class="QLineEdit" name="lineEdit_latitude"/>
-   </item>
-   <item row="4" column="0" colspan="4">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2" rowspan="2">
-    <widget class="QPushButton" name="pushButton_getGPS">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Get GPS</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_longitude">
-     <property name="text">
-      <string>Longitude</string>
-     </property>
-    </widget>
    </item>
    <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="label_header">
@@ -83,15 +46,42 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_researcher">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_longitude">
      <property name="text">
-      <string>Researcher</string>
+      <string>Longitude</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1" colspan="2">
-    <widget class="QComboBox" name="comboBox_researcher"/>
+   <item row="1" column="2" rowspan="2">
+    <widget class="QPushButton" name="pushButton_getGPS">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Get GPS</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="4">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_latitude">
+     <property name="text">
+      <string>Latitude</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
