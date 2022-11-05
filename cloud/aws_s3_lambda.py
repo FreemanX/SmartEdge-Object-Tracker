@@ -29,7 +29,7 @@ def lambda_handler(event, context):
 			continue # skip files(directories) that end with /
 		if len(filename.split("/")) > 2:
 			continue # skip multiple hierarchies
-		if len(filename.split("/")) > 0:
+		if len(filename.split("/")) > 1:
 			filename = filename.split("/")[1]
 
 		print("putting extracted file", filename)

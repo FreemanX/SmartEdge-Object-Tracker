@@ -91,6 +91,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
+        # TODO
         self.capture_a_frame = True
 
     def on_start_clicked(self):
