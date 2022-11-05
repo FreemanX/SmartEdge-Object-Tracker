@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 from PyQt5.QtCore import QDateTime
-from new_trip_dialog_ui import Ui_NewTripDialog
+from ui.new_trip_dialog_ui import Ui_NewTripDialog
 from random import uniform
 
 class NewTripDialog(QDialog):
@@ -22,7 +22,7 @@ class NewTripDialog(QDialog):
         self.ui.pushButton_getGPS.clicked.connect(self.buttonClicked)
         
     def buttonClicked(self):
-        self.ui.lineEdit_latitude.setText(str(uniform(-180, 180)))
-        self.ui.lineEdit_longitude.setText(str(uniform(-90, 90)))
+        self.ui.lineEdit_latitude.setText(str(uniform(-90, 90)))
+        self.ui.lineEdit_longitude.setText(str(uniform(-180, 180)))
     
         
