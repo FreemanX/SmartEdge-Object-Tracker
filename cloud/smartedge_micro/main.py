@@ -55,12 +55,12 @@ async def list_trips():
 			continue # skip on unexpected filename
 		if parts[4].endswith(META_FILE_EXT) != True:
 			continue # skip on unexpected filename
-		trip_name = parts[1]
+		# trip_name = parts[1] # just always "trip"
 		dt = parts[2]
 		lat = parts[3]
 		long = parts[4].strip(META_FILE_EXT)
 		resp["data"].append({
-			"name": trip_name,
+			# "name": trip_name,
 			"datetime": dt,
 			"latitude": lat,
 			"longitude": long,
