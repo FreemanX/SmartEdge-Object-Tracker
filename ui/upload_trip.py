@@ -116,7 +116,7 @@ class UploadTripDialog(QDialog):
             zipPath = f'./trips/export/zip_{trip}'            
             shutil.make_archive(zipPath, 'zip', f'./trips/{trip}')
             helper.data_signal.emit(f"({count}/{len(uploadTripList)}) Uploading trip...")
-            upload_binary(f'zip_{trip}.zip', f'{zipPath}.zip')            
+            upload_s3(f'{zipPath}.zip', f'zip_{trip}.zip')
         helper.data_signal.emit(f"({count}/{len(uploadTripList)}) Done")
         QDialog.accept(self)
 
