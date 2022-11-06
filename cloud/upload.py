@@ -1,6 +1,5 @@
 import http.client
 import os
-
 from datetime import datetime
 
 API_HOST = "rhz3bho1fk.execute-api.ap-southeast-2.amazonaws.com"
@@ -30,3 +29,26 @@ def meta_filename(trip_name, latitude, longitude):
 
 def filename(trip_name, filename):
 	return "%s_%s_%s" % (trip_name, datetime.now().strftime("%Y%m%d%H%M%S"), filename)
+
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
+
+def upload_s3(filepath, object_name):
+	S3_KEY_ID = os.getenv("S3_KEY_ID")
+	S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
+	
+	s3_client = boto3.client(
+		"s3",
+		aws_access_key_id=S3_KEY_ID,
+		aws_secret_access_key=S3_SECRET_KEY,
+	)
+
+	with open(filepath, "rb") as f:
+		try:
+			s3_client.upload_fileobj(f, BUCKET_NAME, object_name)
+		except ClientError:
+			# handle error
+			raise
+		except NoCredentialsError:
+			# handle error
+			raise
