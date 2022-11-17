@@ -71,9 +71,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.update_start_button()
 
     def set_ui_init_behaviour(self):
-        # self.pushButton_start.setEnabled(False)
+        self.pushButton_start.setEnabled(False)
         # self.pushButton_capture.setEnabled(False)
-        self.horizontalScrollBar_sensitivity.setEnabled(False)
+        # self.horizontalScrollBar_sensitivity.setEnabled(False)
 
     def set_ui_actions(self):
         # ---------  Sample Action
@@ -87,6 +87,10 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_capture.clicked.connect(self.on_capture_clicked)
         self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
         self.pushButton_upload.clicked.connect(self.on_upload_clicked)
+        self.checkBox_obj_tracking.stateChanged.connect(self.on_track_cots_clicked)
+
+    def on_track_cots_clicked(self):
+        self.inference_backend.set_enable_tracker(self.checkBox_obj_tracking.isChecked())
 
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
@@ -173,8 +177,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         pad_size = 35
         msg_str = f"FPS: {results['fps']} ".ljust(pad_size)
         msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
-        msg_str += f"Num COTS: {round(results['n_objects'])} ".ljust(pad_size)
+        msg_str += f"Num COTS current frame: {round(results['n_objects'])} ".ljust(pad_size)
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
+        msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size)
         self.statusbar.showMessage(msg_str)
 
         # ---------- Displaying COTS -----------
@@ -186,7 +191,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         p_size = 140 if len(boxes) < 10 else 70
         for idx, box in enumerate(boxes):
             kp = [int(x) for x in box]
-            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]#.copy()
+            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]
             patch = cv.resize(patch, (p_size, p_size))
             x_pos = idx * p_size if p_size == 140 else (idx % 18) * p_size
             y_pox = 0 if p_size == 140 else idx // 18 * p_size
@@ -336,7 +341,9 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             if self.start_detection:
                 self.detector.current_temperature = get_next_temperature(
                     self.detector.current_temperature)
-                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']}; Temperature: {round(self.detector.current_temperature, 1)}"
+                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']};Temperature: {round(self.detector.current_temperature, 1)}"
+                if self.inf_bkend.get_enable_tracker():
+                    frame_text += f";COTS Count: {results['cots_cnt']}"
                 out_frame = add_text_to_frame(out_frame, frame_text)
             self.sig_source.emit(cvt_cv_to_qt(out_frame))
 

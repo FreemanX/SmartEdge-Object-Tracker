@@ -10,8 +10,26 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 import tensorrt as trt
 
-from libs.Log import Log
 
+from libs.Log import Log
+from libs.sort import Sort
+
+COLOR_PALETTE = [
+    (230, 25, 75),
+    (60, 180, 75),
+    (67, 99, 216),
+    (245, 130, 49),
+    (145, 30, 37),
+    (22, 246, 12),
+    (0, 128, 128),
+    (154, 99, 36),
+    (128, 0, 0),
+    (128, 128, 0),
+    (0, 0, 117),
+    (128, 128, 128),
+    (0, 0, 0),
+    (0, 0, 255)
+]
 
 class InferenceBackend():
     categories = ["COTS"]
@@ -27,6 +45,12 @@ class InferenceBackend():
     def get_confidence(self):
         return self.yolov5_wrapper.conf_thresh
 
+    def set_enable_tracker(self, v:bool):
+        self.yolov5_wrapper.enable_tracker = v
+    
+    def get_enable_tracker(self):
+        return self.yolov5_wrapper.enable_tracker
+
     def release_resrouce(self):
         """
         Must call this function on exit
@@ -34,12 +58,18 @@ class InferenceBackend():
         self.yolov5_wrapper.destroy()
     
     def inference(self, input_frame):
-        output_frame, inference_time, n_objects, bbox_lst = self.yolov5_wrapper.inference(input_frame)
+        output_frame, inference_time, n_objects, \
+                bbox_lst, conf_lst, cls_lst, \
+                cots_cnt, track_dict = self.yolov5_wrapper.inference(input_frame)
         return {
             'out_frame': output_frame,
             'inference_time': inference_time,
             'n_objects': n_objects,
-            'boxes': bbox_lst
+            'boxes': bbox_lst,
+            'confs': conf_lst,
+            'cls_lst': cls_lst,
+            'cots_cnt': cots_cnt,
+            'track_dict': track_dict
         }
 
 
@@ -122,6 +152,30 @@ def plot_one_box(x, img, color=None, label=None, line_thickness=None):
             lineType=cv2.LINE_AA,
         )
 
+def draw_boxes(
+    img, bbox, identities=None, categories=None, names=None, offset=(0, 0), colors=[]
+):
+    object_dict = {}
+    """Function to Draw Bounding boxes"""
+    for i, box in enumerate(bbox):
+        x1, y1, x2, y2 = [int(i) for i in box]
+        x1 += offset[0]
+        x2 += offset[0]
+        y1 += offset[1]
+        y2 += offset[1]
+        cat = int(categories[i]) if categories is not None else 0
+        id = int(identities[i]) if identities is not None else 0
+        object_dict[id] = [x1, y1, x2, y2]
+        color = colors[(id - 1) % len(colors)]
+        label = str(id) + ":" + names[cat]
+        (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+        cv2.rectangle(img, (x1, y1 - 20), (x1 + w, y1), color, -1)
+        cv2.putText(
+            img, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, [255, 255, 255], 1
+        )
+        # cv2.circle(img, data, 6, color,-1)
+    return img, object_dict
 
 class Yolov5TRT(object):
     """
@@ -136,6 +190,10 @@ class Yolov5TRT(object):
         runtime = trt.Runtime(trt_logger)
         self.categories = categories
         self.conf_thresh = 0.5
+
+        self.enable_tracker = False
+        self.sort_tracker = Sort(max_age=1, min_hits=2, iou_threshold=0.05)
+        self.cots_cnt = 0
 
         # Deserialize the engine from file
         with open(engine_file_path, "rb") as f:
@@ -220,7 +278,7 @@ class Yolov5TRT(object):
         # Synchronize the stream
         # noinspection PyArgumentList
         stream.synchronize()
-        end = time.time()
+        # end = time.time()
         # Remove any context from the top of the context stack, deactivating it.
         self.ctx.pop()
         # Here we use the first row of output in that batch_size = 1
@@ -229,24 +287,55 @@ class Yolov5TRT(object):
         result_boxes = []
         for i in range(self.batch_size):
             result_boxes, result_scores, result_classid = self.post_process(
-                output[i * 6001: (i + 1) *
-                       6001], batch_origin_h[i], batch_origin_w[i]
+                output[i * 6001: (i + 1) * 6001], batch_origin_h[i], batch_origin_w[i]
             )
             # Draw rectangles and labels on the original image
+            if not self.enable_tracker:
+                for j in range(len(result_boxes)):
+                    box = result_boxes[j]
+                    plot_one_box(
+                        box,
+                        batch_image_raw[i],
+                        label="{}:{:.2f}".format(
+                            self.categories[int(result_classid[j])], 
+                            result_scores[j]
+                        ),
+                        line_thickness=2,
+                        color=(0, 0, 255)
+                    )
+        track_dict = {}
+        if self.enable_tracker:
+            dets_to_sort = np.empty((0, 6))
             for j in range(len(result_boxes)):
                 box = result_boxes[j]
-                plot_one_box(
-                    box,
-                    batch_image_raw[i],
-                    label="{}:{:.2f}".format(
-                        self.categories[int(result_classid[j])
-                                        ], result_scores[j]
-                    ),
-                    line_thickness=1,
-                    color=(0, 0, 255)
+                conf = result_scores[j]
+                cls_id = round(result_classid[j])
+                dets_to_sort = np.vstack(
+                    (dets_to_sort, np.array([box[0], box[1], box[2], box[3], \
+                        conf, cls_id]))
                 )
-            # batch_size = 1, so only return the first
-        return batch_image_raw[0], end - start, len(result_boxes), result_boxes
+            tracked_dets = self.sort_tracker.update(dets_to_sort)
+            if len(tracked_dets) > 0:
+                bbox_xyxy = tracked_dets[:, :4]
+                identities = tracked_dets[:, 8]
+                categories = tracked_dets[:, 4]
+                _, track_dict = draw_boxes(
+                    batch_image_raw[0],
+                    bbox_xyxy,
+                    identities,
+                    categories,
+                    self.categories,
+                    colors=COLOR_PALETTE,
+                )
+                self.cots_cnt = max(int(np.max(identities)), self.cots_cnt)
+        end = time.time()
+        return batch_image_raw[0], \
+            end - start, len(result_boxes), \
+            result_boxes, \
+            result_scores, \
+            result_classid, \
+            self.cots_cnt, \
+            track_dict
 
     def destroy(self):
         try:
