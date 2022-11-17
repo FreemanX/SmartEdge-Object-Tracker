@@ -71,8 +71,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.update_start_button()
 
     def set_ui_init_behaviour(self):
-        self.pushButton_start.setEnabled(False)
-        self.pushButton_capture.setEnabled(False)
+        # self.pushButton_start.setEnabled(False)
+        # self.pushButton_capture.setEnabled(False)
         self.horizontalScrollBar_sensitivity.setEnabled(False)
 
     def set_ui_actions(self):
@@ -120,8 +120,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
             self.trip_root_dir = 'trips'
             self.trip_name = 'trip'
-            self.trip_dir = "%s/%s_%s" % (self.trip_root_dir,
-                                          self.trip_name, self.start_trip_time)
+            self.trip_dir = "%s/%s_%s" % (self.trip_root_dir, self.trip_name, self.start_trip_time)
             create_dir_if_not_exists(self.trip_dir)
 
             self.horizontalScrollBar_sensitivity.setEnabled(True)
@@ -146,20 +145,22 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.label_sensitivity.setText(f"{scroll_bar_value}")
 
     def update_pp_to_ui(self, img):  # update processed frame to ui
-        scaled = QPixmap.fromImage(img).scaled(1280, 720)
-        self.label_camview.setPixmap(scaled)
+        self.label_camview.setPixmap(QPixmap.fromImage(img))
         self.process_results()
 
     def save_metadata(self):
-        if self.fpe.start_detection:
-            json_filename = "meta_%s_%s_%s_%s.json" % (
-                self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
-            with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
-                json.dump(self.metadata, outfile)
-            self.metadata = {}
-            self.label_camview.clear()
-            self.statusbar.showMessage('')
-            self.label_camview.setText('Camera View')
+        try:
+            if self.fpe.start_detection:
+                json_filename = "meta_%s_%s_%s_%s.json" % (
+                    self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
+                with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
+                    json.dump(self.metadata, outfile)
+                self.metadata = {}
+                self.label_camview.clear()
+                self.statusbar.showMessage('')
+                self.label_camview.setText('Camera View')
+        except Exception as e:
+            Log.error(f"Saving metadata error: {e}")
 
     def process_results(self):
         """
@@ -171,12 +172,29 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         # Example: show info on status bar.
         pad_size = 35
         msg_str = f"FPS: {results['fps']} ".ljust(pad_size)
-        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(
-            pad_size)
+        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
         msg_str += f"Num COTS: {round(results['n_objects'])} ".ljust(pad_size)
-        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(
-            pad_size)
+        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
         self.statusbar.showMessage(msg_str)
+
+        # ---------- Displaying COTS -----------
+        cots_patch = np.zeros((140, 1260, 3), dtype=np.uint8)
+        # boxes = sorted(results['boxes'][:36], key=lambda b: b[0])
+        # p_size = 140 if len(boxes) < 10 else 70
+        boxes = sorted(results['boxes'][:9], key=lambda b: b[1], reverse=True)
+        boxes = sorted(boxes, key=lambda b: b[0])
+        p_size = 140 if len(boxes) < 10 else 70
+        for idx, box in enumerate(boxes):
+            kp = [int(x) for x in box]
+            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]#.copy()
+            patch = cv.resize(patch, (p_size, p_size))
+            x_pos = idx * p_size if p_size == 140 else (idx % 18) * p_size
+            y_pox = 0 if p_size == 140 else idx // 18 * p_size
+            cots_patch[y_pox:y_pox+p_size, x_pos:x_pos+p_size, :] = patch[:, :, :]
+
+        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 140))
+        self.label_cots.setPixmap(patch_qt)
+
 
         # ---------- Handle image saving -----------
         # save processed frame
@@ -272,7 +290,9 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         self.frame_height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
 
         self.inf_bkend = inference_backend
-        self.start_detection = False
+        # self.start_detection = False
+        # TODO: DEBUG only reset once done -- Freeman
+        self.start_detection = True
         self.detector = detector
 
     def run(self):  # Implement QThread function
@@ -294,6 +314,7 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             raw_frame = frame.copy()
             if self.start_detection:
                 results = self.inf_bkend.inference(frame)
+                results['n_objects'] = 0 # TODO: Debug only, reset once done -- Freeman
             else:
                 results = {
                     'out_frame': frame,
