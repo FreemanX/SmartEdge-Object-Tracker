@@ -40,6 +40,7 @@ class BufferPackedResult:
         except queue.Empty:
             return False, {}
 
+
 class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def __init__(self, video_file: None):
         BufferPackedResult.__init__(self)
@@ -65,7 +66,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.set_ui_actions()
 
     def set_ui_init_values(self):
-        self.inference_backend.set_confidence(0.9) 
+        self.inference_backend.set_confidence(0.5)
         self.update_sensitivity_label()
         self.update_start_button()
 
@@ -81,13 +82,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         # ---------  Sample Action end
 
         self.fpe.sig_source.connect(self.update_pp_to_ui)
-        self.horizontalScrollBar_sensitivity.valueChanged.connect(
-            self.on_sensitivity_change)
+        self.horizontalScrollBar_sensitivity.valueChanged.connect(self.on_sensitivity_change)
         self.pushButton_start.clicked.connect(self.on_start_clicked)
         self.pushButton_capture.clicked.connect(self.on_capture_clicked)
         self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
         self.pushButton_upload.clicked.connect(self.on_upload_clicked)
-            
+
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
@@ -104,39 +104,30 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_start.setEnabled(self.fpe.start_detection)
         self.pushButton_capture.setEnabled(self.fpe.start_detection)
 
-    def save_metadata(self):
-        if self.fpe.start_detection:
-            json_filename = "meta_%s_%s_%s_%s.json" % (self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
-            with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
-                json.dump(self.metadata, outfile)
-            self.metadata = {}
-            self.label_camview.clear()
-            self.statusbar.showMessage('')
-            self.label_camview.setText('Camera View')
-
     def update_start_button(self):
         if self.fpe.start_detection:
             self.pushButton_start.setText("Stop")
         else:
             self.pushButton_start.setText("Start")
-    
+
     def on_new_trip_clicked(self):
         self.newTripDialog = NewTripDialog()
         result = self.newTripDialog.exec()
         if result == QDialog.Accepted:
-            self.metadata = {}            
+            self.metadata = {}
             self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
             self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
             self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
             self.trip_root_dir = 'trips'
             self.trip_name = 'trip'
-            self.trip_dir = "%s/%s_%s" %(self.trip_root_dir, self.trip_name, self.start_trip_time)
+            self.trip_dir = "%s/%s_%s" % (self.trip_root_dir,
+                                          self.trip_name, self.start_trip_time)
             create_dir_if_not_exists(self.trip_dir)
 
             self.horizontalScrollBar_sensitivity.setEnabled(True)
             self.pushButton_start.setEnabled(True)
             self.pushButton_capture.setEnabled(True)
-    
+
     def on_upload_clicked(self):
         self.uploadTripDialog = UploadTripDialog()
         result = self.uploadTripDialog.exec()
@@ -155,10 +146,20 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.label_sensitivity.setText(f"{scroll_bar_value}")
 
     def update_pp_to_ui(self, img):  # update processed frame to ui
+        scaled = QPixmap.fromImage(img).scaled(1280, 720)
+        self.label_camview.setPixmap(scaled)
+        self.process_results()
+
+    def save_metadata(self):
         if self.fpe.start_detection:
-            scaled = QPixmap.fromImage(img).scaled(1600, 900)
-            self.label_camview.setPixmap(scaled)
-            self.process_results()
+            json_filename = "meta_%s_%s_%s_%s.json" % (
+                self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
+            with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
+                json.dump(self.metadata, outfile)
+            self.metadata = {}
+            self.label_camview.clear()
+            self.statusbar.showMessage('')
+            self.label_camview.setText('Camera View')
 
     def process_results(self):
         """
@@ -170,14 +171,16 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         # Example: show info on status bar.
         pad_size = 35
         msg_str = f"FPS: {results['fps']} ".ljust(pad_size)
-        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
+        msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(
+            pad_size)
         msg_str += f"Num COTS: {round(results['n_objects'])} ".ljust(pad_size)
-        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
+        msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(
+            pad_size)
         self.statusbar.showMessage(msg_str)
 
         # ---------- Handle image saving -----------
         # save processed frame
-        currentTime = str(round(100 * time.time()))
+        currentTime = str(round(10 * time.time()))
         file_prefix = f"{self.trip_name}_{self.start_trip_time}_{currentTime}"
         saveSensorData = False
         if self.fpe.start_detection and results['n_objects'] > 0:
@@ -195,7 +198,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             with open(f'{self.trip_dir}/{file_prefix}.txt', 'w') as f:
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
-        
+
         if self.fpe.start_detection and self.capture_a_frame:
             saveSensorData = True
             cv.imwrite(
@@ -210,7 +213,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         # Save sensor data into metadata
         if saveSensorData:
             self.metadata[currentTime] = {}
-            self.metadata[currentTime]['temperature'] = round(self.current_temperature, 1)
+            self.metadata[currentTime]['temperature'] = round(
+                self.current_temperature, 1)
 
         self.put(results)
 
@@ -246,6 +250,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.exit_procedure()
         return _exit_code
 
+
 class FrameProcessingEngine(QThread, BufferPackedResult):
     sig_source = pyqtSignal(QImage)
 
@@ -274,6 +279,8 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         while self.thread_run:
             timer = time.time()
             ret, frame = self.cap.read()
+            if self.vid_mode and not self.start_detection:
+                time.sleep(0.043333)
             if not ret and self.vid_mode:
                 Log.info(f"End of video reached, reset to the first frame.")
                 self.cap.release()
@@ -299,17 +306,21 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             results['raw_frame'] = raw_frame
             results['total_time'] = time.time() - timer
             try:
-                results['fps'] = round(1/results['inference_time']) if self.start_detection else 0
+                results['fps'] = round(
+                    1/results['inference_time']) if self.start_detection else 0
             except ZeroDivisionError:  # just be safe
                 results['fps'] = 0
             self.put(results)
             # ; separated text, ; is line separator.
             if self.start_detection:
-                self.detector.current_temperature = get_next_temperature(self.detector.current_temperature)
+                self.detector.current_temperature = get_next_temperature(
+                    self.detector.current_temperature)
                 frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']}; Temperature: {round(self.detector.current_temperature, 1)}"
                 out_frame = add_text_to_frame(out_frame, frame_text)
             self.sig_source.emit(cvt_cv_to_qt(out_frame))
+
         self.cap.release()
+
 
 if __name__ == '__main__':
     video_file = sys.argv[1] if len(sys.argv) > 1 else None

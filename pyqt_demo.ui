@@ -58,9 +58,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>100</y>
-      <width>1600</width>
-      <height>900</height>
+      <y>140</y>
+      <width>1280</width>
+      <height>720</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -71,14 +71,14 @@
     </property>
     <property name="minimumSize">
      <size>
-      <width>1600</width>
-      <height>900</height>
+      <width>1280</width>
+      <height>720</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
-      <width>1600</width>
-      <height>900</height>
+      <width>1280</width>
+      <height>720</height>
      </size>
     </property>
     <property name="font">
@@ -105,21 +105,22 @@ color: rgb(255, 255, 255);</string>
    <widget class="QPushButton" name="pushButton_exit">
     <property name="geometry">
      <rect>
-      <x>1640</x>
+      <x>1719</x>
       <y>10</y>
-      <width>260</width>
-      <height>71</height>
+      <width>181</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>60</pointsize>
+      <pointsize>50</pointsize>
       <weight>75</weight>
       <bold>true</bold>
+      <underline>true</underline>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(204, 0, 0);
+     <string notr="true">background-color: rgb(46, 52, 54);
 color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
@@ -130,7 +131,7 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>10</y>
+      <y>30</y>
       <width>191</width>
       <height>81</height>
      </rect>
@@ -154,15 +155,15 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="label_app">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>20</y>
+      <x>230</x>
+      <y>40</y>
       <width>1100</width>
       <height>51</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>80</pointsize>
+      <pointsize>75</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -174,8 +175,8 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="label_team">
     <property name="geometry">
      <rect>
-      <x>1190</x>
-      <y>65</y>
+      <x>1040</x>
+      <y>100</y>
       <width>261</width>
       <height>31</height>
      </rect>
@@ -193,10 +194,10 @@ color: rgb(255, 255, 255);</string>
    <widget class="QPushButton" name="pushButton_start">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>820</y>
+      <x>1340</x>
+      <y>910</y>
       <width>260</width>
-      <height>80</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -207,7 +208,16 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(97, 97, 97, 255), stop:1 rgba(201, 201, 201, 255));
+border-radius: 12px;
+}
+
+QPushButton {
+background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));
+     border-radius: 12px;
+}
+</string>
     </property>
     <property name="text">
      <string>Start</string>
@@ -216,10 +226,10 @@ color: rgb(255, 255, 255);</string>
    <widget class="QPushButton" name="pushButton_capture">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>920</y>
+      <x>1620</x>
+      <y>910</y>
       <width>260</width>
-      <height>80</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -230,7 +240,16 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(97, 97, 97, 255), stop:1 rgba(201, 201, 201, 255));
+border-radius: 12px;
+}
+
+QPushButton {
+background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));
+     border-radius: 12px;
+}
+</string>
     </property>
     <property name="text">
      <string>Capture</string>
@@ -239,10 +258,10 @@ color: rgb(255, 255, 255);</string>
    <widget class="QPushButton" name="pushButton_new_trip">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>100</y>
-      <width>260</width>
-      <height>50</height>
+      <x>1330</x>
+      <y>130</y>
+      <width>271</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -262,9 +281,9 @@ color: rgb(255, 255, 255);</string>
    <widget class="QScrollBar" name="horizontalScrollBar_sensitivity">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>720</y>
-      <width>260</width>
+      <x>1339</x>
+      <y>810</y>
+      <width>541</width>
       <height>80</height>
      </rect>
     </property>
@@ -320,15 +339,15 @@ QScrollBar::add-line:horizontal {
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>670</y>
-      <width>130</width>
+      <x>1340</x>
+      <y>760</y>
+      <width>171</width>
       <height>50</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>40</pointsize>
+      <pointsize>50</pointsize>
      </font>
     </property>
     <property name="text">
@@ -338,15 +357,15 @@ QScrollBar::add-line:horizontal {
    <widget class="QLabel" name="label_sensitivity">
     <property name="geometry">
      <rect>
-      <x>1770</x>
-      <y>670</y>
+      <x>1510</x>
+      <y>760</y>
       <width>130</width>
       <height>50</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>40</pointsize>
+      <pointsize>50</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -358,10 +377,10 @@ QScrollBar::add-line:horizontal {
    <widget class="QPushButton" name="pushButton_upload">
     <property name="geometry">
      <rect>
-      <x>1640</x>
-      <y>160</y>
-      <width>260</width>
-      <height>50</height>
+      <x>1630</x>
+      <y>130</y>
+      <width>261</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -378,36 +397,13 @@ QScrollBar::add-line:horizontal {
      <string>Upload</string>
     </property>
    </widget>
-   <widget class="QScrollArea" name="scrollArea_cots">
-    <property name="geometry">
-     <rect>
-      <x>1640</x>
-      <y>230</y>
-      <width>261</width>
-      <height>441</height>
-     </rect>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>259</width>
-       <height>439</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
    <widget class="QLabel" name="bg_color">
     <property name="geometry">
      <rect>
-      <x>1630</x>
-      <y>220</y>
-      <width>280</width>
-      <height>790</height>
+      <x>1319</x>
+      <y>210</y>
+      <width>581</width>
+      <height>791</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -424,18 +420,167 @@ QScrollBar::add-line:horizontal {
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>1621</width>
+      <y>20</y>
+      <width>1301</width>
       <height>101</height>
      </rect>
     </property>
+    <property name="palette">
+     <palette>
+      <active/>
+      <inactive/>
+      <disabled/>
+     </palette>
+    </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 230, 0);</string>
+     <string notr="true"/>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_reboot">
+    <property name="geometry">
+     <rect>
+      <x>1520</x>
+      <y>10</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>50</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(204, 0, 0);
+color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Reboot</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_poweroff">
+    <property name="geometry">
+     <rect>
+      <x>1320</x>
+      <y>10</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>50</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(206, 92, 0);
+color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Power off</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>1330</x>
+      <y>80</y>
+      <width>301</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>50</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Trip Management</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>1330</x>
+      <y>210</y>
+      <width>301</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>50</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Detetion Panel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="bg_color_2">
+    <property name="geometry">
+     <rect>
+      <x>1320</x>
+      <y>80</y>
+      <width>581</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_cots">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>862</y>
+      <width>1280</width>
+      <height>140</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_cots_sort">
+    <property name="geometry">
+     <rect>
+      <x>1335</x>
+      <y>260</y>
+      <width>550</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <zorder>bg_color_2</zorder>
    <zorder>header_bg_color</zorder>
    <zorder>bg_color</zorder>
    <zorder>label_camview</zorder>
@@ -450,7 +595,12 @@ QScrollBar::add-line:horizontal {
    <zorder>label</zorder>
    <zorder>label_sensitivity</zorder>
    <zorder>pushButton_upload</zorder>
-   <zorder>scrollArea_cots</zorder>
+   <zorder>pushButton_reboot</zorder>
+   <zorder>pushButton_poweroff</zorder>
+   <zorder>label_2</zorder>
+   <zorder>label_3</zorder>
+   <zorder>label_cots</zorder>
+   <zorder>label_cots_sort</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
