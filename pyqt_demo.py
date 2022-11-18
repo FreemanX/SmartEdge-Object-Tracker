@@ -51,34 +51,40 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.MainWindow.setWindowFlag(Qt.WindowCloseButtonHint, False)
         self.MainWindow.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
         self.MainWindow.setWindowFlag(Qt.WindowMinimizeButtonHint, False)
+        self.MainWindow.show()
 
         self.capture_a_frame = False
-        self.inference_backend = InferenceBackend()
         self.current_temperature = get_initial_temperature()
-        self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
-        self.metadata = {}
-        self.start_trip_time = ''
-        self.trip_root_dir = 'trips'
-        self.trip_name = 'trip'
+        self.inference_backend = InferenceBackend()
+        try:
+            self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
+            self.track_id_patch_dict = {}
+            self.metadata = {}
+            self.start_trip_time = ''
+            self.trip_root_dir = 'trips'
+            self.trip_name = 'trip'
 
-        self.set_ui_init_values()
-        self.set_ui_init_behaviour()
-        self.set_ui_actions()
+            self.set_ui_init_values()
+            self.set_ui_init_behaviour()
+            self.set_ui_actions()
+        except Exception as e:
+            self.fpe = None
+            self.widget_error_screen.setVisible(True)
+        self.pushButton_exit.clicked.connect(lambda: self.MainWindow.close())
 
     def set_ui_init_values(self):
+        self.widget_error_screen.setVisible(False)
         self.inference_backend.set_confidence(0.5)
         self.update_sensitivity_label()
         self.update_start_button()
 
     def set_ui_init_behaviour(self):
         self.pushButton_start.setEnabled(False)
-        # self.pushButton_capture.setEnabled(False)
-        # self.horizontalScrollBar_sensitivity.setEnabled(False)
+        self.pushButton_capture.setEnabled(False)
 
     def set_ui_actions(self):
         # ---------  Sample Action
         self.MainWindow.closeEvent = self.ask_stop_app
-        self.pushButton_exit.clicked.connect(lambda: self.MainWindow.close())
         # ---------  Sample Action end
 
         self.fpe.sig_source.connect(self.update_pp_to_ui)
@@ -166,13 +172,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         except Exception as e:
             Log.error(f"Saving metadata error: {e}")
 
-    def process_results(self):
-        """
-        Further result processing procedure goes here.
-        """
-        ret, results = self.fpe.get()
-        if not ret:
-            return
+    def update_status_bar(self, results):
         # Example: show info on status bar.
         pad_size = 35
         msg_str = f"FPS: {results['fps']} ".ljust(pad_size)
@@ -181,7 +181,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
         msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size)
         self.statusbar.showMessage(msg_str)
-
+        
+    def show_objects_current_frame(self, results):
         # ---------- Displaying COTS -----------
         cots_patch = np.zeros((140, 1260, 3), dtype=np.uint8)
         # boxes = sorted(results['boxes'][:36], key=lambda b: b[0])
@@ -199,8 +200,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
         patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 140))
         self.label_cots.setPixmap(patch_qt)
-
-
+        
+    def save_results(self, results):
+        # TODO: if no new trip: return
         # ---------- Handle image saving -----------
         # save processed frame
         currentTime = str(round(10 * time.time()))
@@ -231,13 +233,33 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.capture_a_frame = False
             self.pushButton_capture.setEnabled(True)
             self.pushButton_capture.setText("Capture")
-        # ---------- End Handle image saving -----------
 
         # Save sensor data into metadata
         if saveSensorData:
             self.metadata[currentTime] = {}
             self.metadata[currentTime]['temperature'] = round(
                 self.current_temperature, 1)
+        
+    def show_tracked_objects(self, results):
+        # ---------- Tracking COTS -------------
+        if not self.checkBox_obj_tracking.isChecked():
+            return
+        
+        
+        
+
+    def process_results(self):
+        """
+        Further result processing procedure goes here.
+        """
+        ret, results = self.fpe.get()
+        if not ret:
+            return
+        
+        self.update_status_bar(results)
+        self.show_objects_current_frame(results)
+        self.save_results(results)
+        self.show_tracked_objects(results)
 
         self.put(results)
 
@@ -258,17 +280,19 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             event.ignore()
 
     def exit_procedure(self):
-        self.save_metadata()
         Log.info(f"Exiting procedure in prrogress...")
         self.inference_backend.release_resrouce()
-        self.fpe.thread_run = False
-        self.fpe.exit(0)
+        if self.fpe:
+            self.save_metadata()
+            self.fpe.thread_run = False
+            self.fpe.exit(0)
         time.sleep(3)
         Log.info(f"Exiting procedure done.")
 
     def launch(self):
-        self.MainWindow.show()
-        self.fpe.start()
+        Log.info("Launching the application...")
+        if self.fpe:
+            self.fpe.start()
         _exit_code = self.qt_app.exec_()
         self.exit_procedure()
         return _exit_code

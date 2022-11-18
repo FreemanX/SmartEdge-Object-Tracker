@@ -82,13 +82,14 @@ class Ui_MainWindow(object):
         self.label_team.setFont(font)
         self.label_team.setObjectName("label_team")
         self.pushButton_start = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_start.setGeometry(QtCore.QRect(1340, 910, 260, 81))
+        self.pushButton_start.setGeometry(QtCore.QRect(1340, 185, 260, 50))
         font = QtGui.QFont()
-        font.setPointSize(60)
+        font.setPointSize(45)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton_start.setFont(font)
-        self.pushButton_start.setStyleSheet("QPushButton:pressed { \n"
+        self.pushButton_start.setStyleSheet("/*\n"
+"QPushButton:pressed { \n"
 "background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(97, 97, 97, 255), stop:1 rgba(201, 201, 201, 255));\n"
 "border-radius: 12px;\n"
 "}\n"
@@ -97,16 +98,18 @@ class Ui_MainWindow(object):
 "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));\n"
 "     border-radius: 12px;\n"
 "}\n"
+"*/\n"
 "")
         self.pushButton_start.setObjectName("pushButton_start")
         self.pushButton_capture = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_capture.setGeometry(QtCore.QRect(1620, 910, 260, 81))
+        self.pushButton_capture.setGeometry(QtCore.QRect(1630, 185, 260, 50))
         font = QtGui.QFont()
-        font.setPointSize(60)
+        font.setPointSize(45)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton_capture.setFont(font)
-        self.pushButton_capture.setStyleSheet("QPushButton:pressed { \n"
+        self.pushButton_capture.setStyleSheet("/*\n"
+"QPushButton:pressed { \n"
 "background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(97, 97, 97, 255), stop:1 rgba(201, 201, 201, 255));\n"
 "border-radius: 12px;\n"
 "}\n"
@@ -115,19 +118,20 @@ class Ui_MainWindow(object):
 "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));\n"
 "     border-radius: 12px;\n"
 "}\n"
+"*/\n"
 "")
         self.pushButton_capture.setObjectName("pushButton_capture")
         self.pushButton_new_trip = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_new_trip.setGeometry(QtCore.QRect(1330, 120, 271, 61))
+        self.pushButton_new_trip.setGeometry(QtCore.QRect(1340, 125, 260, 50))
         font = QtGui.QFont()
-        font.setPointSize(40)
+        font.setPointSize(45)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton_new_trip.setFont(font)
         self.pushButton_new_trip.setStyleSheet("")
         self.pushButton_new_trip.setObjectName("pushButton_new_trip")
         self.horizontalScrollBar_sensitivity = QtWidgets.QScrollBar(self.centralwidget)
-        self.horizontalScrollBar_sensitivity.setGeometry(QtCore.QRect(1339, 815, 541, 80))
+        self.horizontalScrollBar_sensitivity.setGeometry(QtCore.QRect(1335, 365, 550, 71))
         self.horizontalScrollBar_sensitivity.setStyleSheet("QScrollBar:horizontal {\n"
 "  border-radius:6px;\n"
 "  border-color: none;\n"
@@ -172,30 +176,30 @@ class Ui_MainWindow(object):
         self.horizontalScrollBar_sensitivity.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalScrollBar_sensitivity.setObjectName("horizontalScrollBar_sensitivity")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(1340, 765, 171, 50))
+        self.label.setGeometry(QtCore.QRect(1335, 315, 321, 50))
         font = QtGui.QFont()
-        font.setPointSize(50)
+        font.setPointSize(40)
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.label_sensitivity = QtWidgets.QLabel(self.centralwidget)
-        self.label_sensitivity.setGeometry(QtCore.QRect(1510, 765, 130, 50))
+        self.label_sensitivity.setGeometry(QtCore.QRect(1590, 315, 130, 50))
         font = QtGui.QFont()
-        font.setPointSize(50)
+        font.setPointSize(40)
         font.setBold(True)
         font.setWeight(75)
         self.label_sensitivity.setFont(font)
         self.label_sensitivity.setObjectName("label_sensitivity")
         self.pushButton_upload = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_upload.setGeometry(QtCore.QRect(1630, 120, 261, 61))
+        self.pushButton_upload.setGeometry(QtCore.QRect(1630, 125, 260, 50))
         font = QtGui.QFont()
-        font.setPointSize(40)
+        font.setPointSize(45)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton_upload.setFont(font)
         self.pushButton_upload.setStyleSheet("")
         self.pushButton_upload.setObjectName("pushButton_upload")
         self.bg_color = QtWidgets.QLabel(self.centralwidget)
-        self.bg_color.setGeometry(QtCore.QRect(1319, 200, 581, 801))
+        self.bg_color.setGeometry(QtCore.QRect(1319, 260, 581, 741))
         self.bg_color.setAutoFillBackground(False)
         self.bg_color.setStyleSheet("background-color: rgb(211, 215, 207);")
         self.bg_color.setText("")
@@ -230,15 +234,17 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);")
         self.pushButton_poweroff.setObjectName("pushButton_poweroff")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(1330, 70, 301, 50))
+        self.label_2.setGeometry(QtCore.QRect(1330, 75, 301, 50))
         font = QtGui.QFont()
         font.setPointSize(50)
         font.setBold(True)
+        font.setItalic(False)
         font.setWeight(75)
         self.label_2.setFont(font)
+        self.label_2.setStyleSheet("color: rgb(0, 0, 0);")
         self.label_2.setObjectName("label_2")
         self.bg_color_2 = QtWidgets.QLabel(self.centralwidget)
-        self.bg_color_2.setGeometry(QtCore.QRect(1320, 70, 581, 121))
+        self.bg_color_2.setGeometry(QtCore.QRect(1320, 80, 580, 170))
         self.bg_color_2.setAutoFillBackground(False)
         self.bg_color_2.setStyleSheet("background-color: rgb(238, 238, 236);")
         self.bg_color_2.setText("")
@@ -248,20 +254,87 @@ class Ui_MainWindow(object):
         self.label_cots.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.label_cots.setText("")
         self.label_cots.setObjectName("label_cots")
-        self.label_cots_sort = QtWidgets.QLabel(self.centralwidget)
-        self.label_cots_sort.setGeometry(QtCore.QRect(1335, 260, 550, 500))
-        self.label_cots_sort.setStyleSheet("background-color: rgb(0, 0, 0);")
-        self.label_cots_sort.setText("")
-        self.label_cots_sort.setObjectName("label_cots_sort")
         self.checkBox_obj_tracking = QtWidgets.QCheckBox(self.centralwidget)
-        self.checkBox_obj_tracking.setGeometry(QtCore.QRect(1340, 215, 351, 31))
+        self.checkBox_obj_tracking.setGeometry(QtCore.QRect(1340, 457, 351, 31))
         font = QtGui.QFont()
-        font.setPointSize(50)
+        font.setPointSize(45)
         font.setBold(True)
         font.setWeight(75)
         self.checkBox_obj_tracking.setFont(font)
         self.checkBox_obj_tracking.setStyleSheet("QCheckBox::indicator { width: 30px; height: 30px;}")
         self.checkBox_obj_tracking.setObjectName("checkBox_obj_tracking")
+        self.label_track_cots = QtWidgets.QLabel(self.centralwidget)
+        self.label_track_cots.setGeometry(QtCore.QRect(1335, 495, 550, 500))
+        self.label_track_cots.setStyleSheet("background-color: rgb(0, 0, 0);")
+        self.label_track_cots.setText("")
+        self.label_track_cots.setObjectName("label_track_cots")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(1330, 260, 301, 50))
+        font = QtGui.QFont()
+        font.setPointSize(50)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.label_3.setFont(font)
+        self.label_3.setStyleSheet("color: rgb(0, 0, 0);")
+        self.label_3.setObjectName("label_3")
+        self.widget_error_screen = QtWidgets.QWidget(self.centralwidget)
+        self.widget_error_screen.setEnabled(True)
+        self.widget_error_screen.setGeometry(QtCore.QRect(20, 140, 1280, 720))
+        font = QtGui.QFont()
+        font.setFamily("aakar")
+        font.setPointSize(25)
+        self.widget_error_screen.setFont(font)
+        self.widget_error_screen.setStyleSheet("background-color: rgb(9, 26, 138);")
+        self.widget_error_screen.setObjectName("widget_error_screen")
+        self.label_4 = QtWidgets.QLabel(self.widget_error_screen)
+        self.label_4.setGeometry(QtCore.QRect(540, 159, 161, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setPointSize(50)
+        self.label_4.setFont(font)
+        self.label_4.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"color: rgb(9, 26, 138);")
+        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(self.widget_error_screen)
+        self.label_5.setGeometry(QtCore.QRect(210, 230, 871, 251))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setPointSize(40)
+        self.label_5.setFont(font)
+        self.label_5.setStyleSheet("color: rgb(255, 255, 255);")
+        self.label_5.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.label_5.setObjectName("label_5")
+        self.label_6 = QtWidgets.QLabel(self.widget_error_screen)
+        self.label_6.setGeometry(QtCore.QRect(270, 500, 721, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu Mono")
+        font.setPointSize(40)
+        self.label_6.setFont(font)
+        self.label_6.setStyleSheet("color: rgb(255, 255, 255);")
+        self.label_6.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_6.setObjectName("label_6")
+        self.pushButton_reset_counter = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_reset_counter.setGeometry(QtCore.QRect(1695, 450, 191, 40))
+        font = QtGui.QFont()
+        font.setPointSize(40)
+        font.setBold(False)
+        font.setWeight(50)
+        self.pushButton_reset_counter.setFont(font)
+        self.pushButton_reset_counter.setStyleSheet("/*\n"
+"QPushButton:pressed { \n"
+"background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(97, 97, 97, 255), stop:1 rgba(201, 201, 201, 255));\n"
+"border-radius: 12px;\n"
+"}\n"
+"\n"
+"QPushButton {\n"
+"background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));\n"
+"     border-radius: 12px;\n"
+"}\n"
+"*/\n"
+"")
+        self.pushButton_reset_counter.setObjectName("pushButton_reset_counter")
         self.bg_color_2.raise_()
         self.header_bg_color.raise_()
         self.bg_color.raise_()
@@ -281,8 +354,11 @@ class Ui_MainWindow(object):
         self.pushButton_poweroff.raise_()
         self.label_2.raise_()
         self.label_cots.raise_()
-        self.label_cots_sort.raise_()
         self.checkBox_obj_tracking.raise_()
+        self.label_track_cots.raise_()
+        self.label_3.raise_()
+        self.widget_error_screen.raise_()
+        self.pushButton_reset_counter.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         font = QtGui.QFont()
@@ -307,14 +383,25 @@ class Ui_MainWindow(object):
         self.label_team.setText(_translate("MainWindow", "COMP6733 Team SmartEdge"))
         self.pushButton_start.setText(_translate("MainWindow", "Start"))
         self.pushButton_capture.setText(_translate("MainWindow", "Capture"))
-        self.pushButton_new_trip.setText(_translate("MainWindow", "New Trip"))
-        self.label.setText(_translate("MainWindow", "Sensitivity:"))
+        self.pushButton_new_trip.setText(_translate("MainWindow", "New Log"))
+        self.label.setText(_translate("MainWindow", "Detection Sensitivity:"))
         self.label_sensitivity.setText(_translate("MainWindow", "0"))
         self.pushButton_upload.setText(_translate("MainWindow", "Upload"))
         self.pushButton_reboot.setText(_translate("MainWindow", "Reboot"))
         self.pushButton_poweroff.setText(_translate("MainWindow", "Power off"))
-        self.label_2.setText(_translate("MainWindow", "Trip Management"))
+        self.label_2.setText(_translate("MainWindow", "Detection Logging"))
         self.checkBox_obj_tracking.setText(_translate("MainWindow", " Track COTS"))
+        self.label_3.setText(_translate("MainWindow", "Control Panel"))
+        self.label_4.setText(_translate("MainWindow", "Input Error"))
+        self.label_5.setText(_translate("MainWindow", " A fatal exceptioin has occured when trying to connect to the camerea or load\n"
+" the video file. Please do the following and try again. \n"
+"\n"
+"\n"
+"       *    Check the connection to the camerea. \n"
+"\n"
+"       *    Make sure you have provided the correct video file."))
+        self.label_6.setText(_translate("MainWindow", "Press Exit button to terminate this applicatioin _"))
+        self.pushButton_reset_counter.setText(_translate("MainWindow", "Reset counter"))
 
 
 if __name__ == "__main__":

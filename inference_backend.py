@@ -39,6 +39,9 @@ class InferenceBackend():
         ctypes.CDLL(PLUGIN_LIBRARY)
         self.yolov5_wrapper = Yolov5TRT(engine_file_path, self.categories)
 
+    def reset_object_count(self):
+        self.yolov5_wrapper.reset_tracker()
+
     def set_confidence(self, conf: float):
         self.yolov5_wrapper.set_conf_thresh(conf)
 
@@ -192,8 +195,7 @@ class Yolov5TRT(object):
         self.conf_thresh = 0.5
 
         self.enable_tracker = False
-        self.sort_tracker = Sort(max_age=1, min_hits=2, iou_threshold=0.05)
-        self.cots_cnt = 0
+        self.reset_tracker()
 
         # Deserialize the engine from file
         with open(engine_file_path, "rb") as f:
@@ -235,6 +237,10 @@ class Yolov5TRT(object):
         self.cuda_outputs = cuda_outputs
         self.bindings = bindings
         self.batch_size = engine.max_batch_size
+
+    def reset_tracker(self):
+        self.sort_tracker = Sort(max_age=1, min_hits=2, iou_threshold=0.05)
+        self.cots_cnt = 0
 
     def set_conf_thresh(self, v):
         self.conf_thresh = v
