@@ -1227,7 +1227,7 @@ cython_debug/
 .vscode
 *.mp4
 .deta
-*.engine
+*.engine*
 logs
 trips
 *tmp*

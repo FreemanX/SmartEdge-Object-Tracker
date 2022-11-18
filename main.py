@@ -10,7 +10,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox, QDialog
 
-import pyqt_demo_ui as UI
+import ui.app_ui as UI
 
 from cloud.upload import *
 from inference_backend import *
@@ -55,7 +55,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.capture_a_frame = False
         self.current_temperature = get_initial_temperature()
         self.inference_backend = InferenceBackend()
-        try:
+        try:  # if camera is working or video files can be loaded
             self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
             self.track_id_patch_dict = {}
             self.metadata = {}
@@ -107,7 +107,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
-        # TODO
+        # TODO  (freeman: what to do?)
         self.capture_a_frame = True
 
     def on_start_clicked(self):
