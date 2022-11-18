@@ -46,9 +46,8 @@ def upload_s3(filepath, object_name):
 	with open(filepath, "rb") as f:
 		try:
 			s3_client.upload_fileobj(f, BUCKET_NAME, object_name)
-		except ClientError:
-			# handle error
-			raise
-		except NoCredentialsError:
-			# handle error
-			raise
+
+		except ClientError as err:
+			raise Exception(err.response['Error']['Message'])
+		except NoCredentialsError as err:
+			raise Exception(err.response['Error']['Message'])

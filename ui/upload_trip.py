@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QAbstractItemView
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QAbstractItemView, QMessageBox
 from PyQt5.QtCore import QDateTime, Qt, pyqtSignal, QObject
 from PyQt5 import QtCore, QtWidgets
 from ui.upload_trip_dialog_ui import Ui_NewTripDialog
@@ -11,6 +11,7 @@ import shutil
 
 class Helper(QObject):
     data_signal = pyqtSignal(str)
+    error_signal = pyqtSignal(str)
 
 helper = Helper()
 
@@ -36,7 +37,7 @@ class UploadTripDialog(QDialog):
         self.ui.tableWidget.sortItems(0, Qt.AscendingOrder)
         self.ui.buttonBox.button(QDialogButtonBox.Ok).setText("Upload")
         self.ui.label_upload.setText("No Selected")
-        self.setupTableWidget();
+        self.setupTableWidget()
 
     def setupTableWidget(self):
         self.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -94,9 +95,17 @@ class UploadTripDialog(QDialog):
         self.ui.label_upload.setText(text)
         print(text)
 
+    def onErrorSignal(self, error):
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle("Error")
+        msgBox.setText(str(error))
+        msgBox.setStandardButtons(QMessageBox.Ok)
+        msgBox.exec()
+
     def accept(self):
         thread = threading.Thread(target=self.uploadTrips)
         helper.data_signal.connect(self.onDataSignal)
+        helper.error_signal.connect(self.onErrorSignal)
         thread.start()
     
     def uploadTrips(self):
@@ -116,7 +125,11 @@ class UploadTripDialog(QDialog):
             zipPath = f'./trips/export/zip_{trip}'            
             shutil.make_archive(zipPath, 'zip', f'./trips/{trip}')
             helper.data_signal.emit(f"({count}/{len(uploadTripList)}) Uploading trip...")
-            upload_s3(f'{zipPath}.zip', f'zip_{trip}.zip')
+            try:
+                upload_s3(f'{zipPath}.zip', f'zip_{trip}.zip')
+            except Exception as err:
+                helper.error_signal.emit(str(err))
+                
         helper.data_signal.emit(f"({count}/{len(uploadTripList)}) Done")
         QDialog.accept(self)
 
