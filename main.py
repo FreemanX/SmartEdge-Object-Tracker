@@ -69,6 +69,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         except Exception as e:
             self.fpe = None
             self.widget_error_screen.setVisible(True)
+        self.exit_code = 0
         self.pushButton_exit.clicked.connect(lambda: self.MainWindow.close())
 
     def set_ui_init_values(self):
@@ -93,8 +94,18 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
         self.pushButton_upload.clicked.connect(self.on_upload_clicked)
         self.pushButton_reset_counter.clicked.connect(self.on_reset_counter_clicked)
+        self.pushButton_reboot.clicked.connect(self.on_reboot_button_clicked)
+        self.pushButton_poweroff.clicked.connect(self.on_poweroff_button_clicked)
 
         self.checkBox_obj_tracking.stateChanged.connect(self.on_track_cots_clicked)
+    
+    def on_reboot_button_clicked(self):
+        self.exit_code = 888;
+        self.MainWindow.close()
+
+    def on_poweroff_button_clicked(self):
+        self.exit_code = 999;
+        self.MainWindow.close()
     
     def on_reset_counter_clicked(self):
         self.inference_backend.reset_object_count()
@@ -312,6 +323,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.qt_app.closeAllWindows()
             event.accept()
         else:
+            self.exit_code = 0
             event.ignore()
 
     def exit_procedure(self):
@@ -331,6 +343,10 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.fpe.start()
         _exit_code = self.qt_app.exec_()
         self.exit_procedure()
+        if self.exit_code == 999:  # poweroff
+            os.system('poweroff')
+        elif self.exit_code == 888:  # reboot
+            os.system('reboot')
         return _exit_code
 
 
