@@ -34,11 +34,8 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
 def upload_s3(filepath, object_name):
-	# S3_KEY_ID = os.getenv("S3_KEY_ID")
-	# S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
-
-	S3_KEY_ID = '123'
-	S3_SECRET_KEY = '345'
+	S3_KEY_ID = os.getenv("S3_KEY_ID")
+	S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
 	
 	s3_client = boto3.client(
 		"s3",
