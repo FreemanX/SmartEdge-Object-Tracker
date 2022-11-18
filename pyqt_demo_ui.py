@@ -269,7 +269,7 @@ class Ui_MainWindow(object):
         self.label_track_cots.setText("")
         self.label_track_cots.setObjectName("label_track_cots")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(1330, 260, 301, 50))
+        self.label_3.setGeometry(QtCore.QRect(1330, 260, 381, 50))
         font = QtGui.QFont()
         font.setPointSize(50)
         font.setBold(True)
@@ -391,7 +391,7 @@ class Ui_MainWindow(object):
         self.pushButton_poweroff.setText(_translate("MainWindow", "Power off"))
         self.label_2.setText(_translate("MainWindow", "Detection Logging"))
         self.checkBox_obj_tracking.setText(_translate("MainWindow", " Track COTS"))
-        self.label_3.setText(_translate("MainWindow", "Control Panel"))
+        self.label_3.setText(_translate("MainWindow", "Detection Control Panel"))
         self.label_4.setText(_translate("MainWindow", "Input Error"))
         self.label_5.setText(_translate("MainWindow", " A fatal exceptioin has occured when trying to connect to the camerea or load\n"
 " the video file. Please do the following and try again. \n"

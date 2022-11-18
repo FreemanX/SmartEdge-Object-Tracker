@@ -169,7 +169,7 @@ def draw_boxes(
         cat = int(categories[i]) if categories is not None else 0
         id = int(identities[i]) if identities is not None else 0
         object_dict[id] = [x1, y1, x2, y2]
-        color = colors[(id - 1) % len(colors)]
+        color = colors[id % len(colors)]
         label = str(id) + ":" + names[cat]
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
@@ -241,6 +241,7 @@ class Yolov5TRT(object):
     def reset_tracker(self):
         self.sort_tracker = Sort(max_age=1, min_hits=2, iou_threshold=0.05)
         self.cots_cnt = 0
+        self.cots_id_cnt_dict = {}
 
     def set_conf_thresh(self, v):
         self.conf_thresh = v
@@ -324,16 +325,24 @@ class Yolov5TRT(object):
             if len(tracked_dets) > 0:
                 bbox_xyxy = tracked_dets[:, :4]
                 identities = tracked_dets[:, 8]
+
+                counter_id = [0.] * len(identities)
+                for k in range(len(identities)):
+                    tid = identities[k]
+                    if tid not in self.cots_id_cnt_dict:
+                        self.cots_id_cnt_dict[tid] = len(self.cots_id_cnt_dict) + 1
+                    counter_id[k] = self.cots_id_cnt_dict[tid]
+
                 categories = tracked_dets[:, 4]
                 _, track_dict = draw_boxes(
                     batch_image_raw[0],
                     bbox_xyxy,
-                    identities,
+                    counter_id,
                     categories,
                     self.categories,
                     colors=COLOR_PALETTE,
                 )
-                self.cots_cnt = max(int(np.max(identities)), self.cots_cnt)
+                self.cots_cnt = len(self.cots_id_cnt_dict)
         end = time.time()
         return batch_image_raw[0], \
             end - start, len(result_boxes), \
@@ -480,10 +489,10 @@ class Yolov5TRT(object):
                 2, box2[:, 1] + box2[:, 3] / 2
         else:
             # Get the coordinates of bounding boxes
-            b1_x1, b1_y1, b1_x2, b1_y2 = box1[:,
-                                              0], box1[:, 1], box1[:, 2], box1[:, 3]
-            b2_x1, b2_y1, b2_x2, b2_y2 = box2[:,
-                                              0], box2[:, 1], box2[:, 2], box2[:, 3]
+            b1_x1, b1_y1, b1_x2, b1_y2 = \
+                box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
+            b2_x1, b2_y1, b2_x2, b2_y2 = \
+                box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
 
         # Get the coordinates of the intersection rectangle
         inter_rect_x1 = np.maximum(b1_x1, b2_x1)

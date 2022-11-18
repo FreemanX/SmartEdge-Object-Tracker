@@ -51,7 +51,6 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.MainWindow.setWindowFlag(Qt.WindowCloseButtonHint, False)
         self.MainWindow.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
         self.MainWindow.setWindowFlag(Qt.WindowMinimizeButtonHint, False)
-        self.MainWindow.show()
 
         self.capture_a_frame = False
         self.current_temperature = get_initial_temperature()
@@ -182,25 +181,6 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size)
         self.statusbar.showMessage(msg_str)
         
-    def show_objects_current_frame(self, results):
-        # ---------- Displaying COTS -----------
-        cots_patch = np.zeros((140, 1260, 3), dtype=np.uint8)
-        # boxes = sorted(results['boxes'][:36], key=lambda b: b[0])
-        # p_size = 140 if len(boxes) < 10 else 70
-        boxes = sorted(results['boxes'][:9], key=lambda b: b[1], reverse=True)
-        boxes = sorted(boxes, key=lambda b: b[0])
-        p_size = 140 if len(boxes) < 10 else 70
-        for idx, box in enumerate(boxes):
-            kp = [int(x) for x in box]
-            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]
-            patch = cv.resize(patch, (p_size, p_size))
-            x_pos = idx * p_size if p_size == 140 else (idx % 18) * p_size
-            y_pox = 0 if p_size == 140 else idx // 18 * p_size
-            cots_patch[y_pox:y_pox+p_size, x_pos:x_pos+p_size, :] = patch[:, :, :]
-
-        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 140))
-        self.label_cots.setPixmap(patch_qt)
-        
     def save_results(self, results):
         # TODO: if no new trip: return
         # ---------- Handle image saving -----------
@@ -208,7 +188,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         currentTime = str(round(10 * time.time()))
         file_prefix = f"{self.trip_name}_{self.start_trip_time}_{currentTime}"
         saveSensorData = False
-        if self.fpe.start_detection and results['n_objects'] > 0:
+        if self.fpe.start_detection and results['n_objects'] > 0: # TODO: don't check start detection, check if a trip has been created
             saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_processed.jpg",
@@ -240,11 +220,59 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.metadata[currentTime]['temperature'] = round(
                 self.current_temperature, 1)
         
+    def show_objects_current_frame(self, results):
+        # ---------- Displaying COTS -----------
+        cots_patch = np.zeros((140, 1260, 3), dtype=np.uint8)
+        # boxes = sorted(results['boxes'][:36], key=lambda b: b[0])
+        # p_size = 140 if len(boxes) < 10 else 70
+        boxes = sorted(results['boxes'][:9], key=lambda b: b[1], reverse=True)
+        boxes = sorted(boxes, key=lambda b: b[0])
+        p_size = 140 if len(boxes) < 10 else 70
+        for idx, box in enumerate(boxes):
+            kp = [int(x) for x in box]
+            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]
+            try:
+                patch = cv.resize(patch, (p_size, p_size))
+            except Exception:
+                pass
+            x_pos = idx * p_size if p_size == 140 else (idx % 18) * p_size
+            y_pox = 0 if p_size == 140 else idx // 18 * p_size
+            cots_patch[y_pox:y_pox+p_size, x_pos:x_pos+p_size, :] = patch[:, :, :]
+
+        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 140))
+        self.label_cots.setPixmap(patch_qt)
+        
     def show_tracked_objects(self, results):
+        """
+        Total drawable space is (500, 550)
+        each patch is of size (100, 110) pixels (h, w)
+        5x5 = 25 most recent detections will be shown in the UI
+        """
         # ---------- Tracking COTS -------------
         if not self.checkBox_obj_tracking.isChecked():
             return
+        raw = results['raw_frame']
+        cots_patch = np.zeros((500, 550, 3), dtype=np.uint8)
+        for k, v in results['track_dict'].items():
+            if k not in self.track_id_patch_dict:
+                self.track_id_patch_dict[k] = np.zeros((100, 110, 3), dtype=np.uint8)
+            try:
+                self.track_id_patch_dict[k] = cv.resize(raw[v[1]:v[3], v[0]:v[2]], (110, 100))
+            except Exception:
+                pass
         
+        self.track_id_patch_dict = dict(sorted(self.track_id_patch_dict.items(), reverse=True)[:25])
+        for idx, (id, patch) in enumerate(self.track_id_patch_dict.items()):
+            row = (idx // 5) * 100
+            col = (idx % 5) * 110
+            cots_patch[row:row+100, col:col+110] = patch
+            bcolor = COLOR_PALETTE[id % len(COLOR_PALETTE)]
+            cv.rectangle(cots_patch, (col+2, row+2), (col+108, row+98), bcolor, 4)
+            cv.rectangle(cots_patch, (col+2, row+2), (col+35, row+20), bcolor, -1)
+            cv.putText(cots_patch, str(id), (col+2, row+14), cv2.FONT_HERSHEY_SIMPLEX, 0.5, [255, 255, 255], 1)
+        
+        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 550, 500))
+        self.label_track_cots.setPixmap(patch_qt)
         
         
 
@@ -290,6 +318,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         Log.info(f"Exiting procedure done.")
 
     def launch(self):
+        self.MainWindow.show()
         Log.info("Launching the application...")
         if self.fpe:
             self.fpe.start()

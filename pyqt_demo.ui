@@ -596,7 +596,7 @@ color: rgb(255, 255, 255);</string>
      <rect>
       <x>1330</x>
       <y>260</y>
-      <width>301</width>
+      <width>381</width>
       <height>50</height>
      </rect>
     </property>
@@ -612,7 +612,7 @@ color: rgb(255, 255, 255);</string>
      <string notr="true">color: rgb(0, 0, 0);</string>
     </property>
     <property name="text">
-     <string>Control Panel</string>
+     <string>Detection Control Panel</string>
     </property>
    </widget>
    <widget class="QWidget" name="widget_error_screen" native="true">
