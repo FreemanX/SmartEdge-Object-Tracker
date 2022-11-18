@@ -34,8 +34,11 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
 def upload_s3(filepath, object_name):
-	S3_KEY_ID = os.getenv("S3_KEY_ID")
-	S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
+	# S3_KEY_ID = os.getenv("S3_KEY_ID")
+	# S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
+
+	S3_KEY_ID = '123'
+	S3_SECRET_KEY = '345'
 	
 	s3_client = boto3.client(
 		"s3",
@@ -46,9 +49,8 @@ def upload_s3(filepath, object_name):
 	with open(filepath, "rb") as f:
 		try:
 			s3_client.upload_fileobj(f, BUCKET_NAME, object_name)
-		except ClientError:
-			# handle error
-			raise
-		except NoCredentialsError:
-			# handle error
-			raise
+
+		except ClientError as err:
+			raise Exception(err.response['Error']['Message'])
+		except NoCredentialsError as err:
+			raise Exception(err.response['Error']['Message'])
