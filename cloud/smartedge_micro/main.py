@@ -4,12 +4,24 @@ import os
 
 from botocore.exceptions import ClientError, NoCredentialsError
 from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 S3_KEY_ID = os.getenv("S3_KEY_ID")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logger = logging.getLogger(__name__)
 
 s3_resource = boto3.resource(
