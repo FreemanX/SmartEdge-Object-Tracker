@@ -16,13 +16,12 @@ class NewTripDialog(QDialog):
         self.connectSignalSlots()
     
     def setupDefaultUi(self):
-        self.setWindowTitle("New Trip")
+        self.setWindowTitle("New Log")
 
     def connectSignalSlots(self):
         self.ui.pushButton_getGPS.clicked.connect(self.buttonClicked)
         
     def buttonClicked(self):
-        self.ui.lineEdit_latitude.setText(str(uniform(-90, 90)))
-        self.ui.lineEdit_longitude.setText(str(uniform(-180, 180)))
-    
-        
+        self.ui.lineEdit_latitude.setText(str(round(uniform(-18.456, -14.750), 6)))
+        self.ui.lineEdit_longitude.setText(str(round(uniform(146.629, 151.033), 6)))
+

@@ -55,6 +55,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.capture_a_frame = False
         self.current_temperature = get_initial_temperature()
         self.inference_backend = InferenceBackend()
+        self.log_started = False
         try:  # if camera is working or video files can be loaded
             self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
             self.track_id_patch_dict = {}
@@ -122,17 +123,24 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.capture_a_frame = True
 
     def on_start_clicked(self):
-        self.save_metadata()
-        self.fpe.start_detection = not self.fpe.start_detection
+        self.log_started = not self.log_started
+        if self.log_started:
+            self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
+            self.trip_root_dir = 'trips'
+            self.trip_name = 'trip'
+            self.trip_dir = "%s/%s_%s" % (self.trip_root_dir, self.trip_name, self.start_trip_time)
+            create_dir_if_not_exists(self.trip_dir)
+        else:
+            self.save_metadata()
+        
         self.update_start_button()
-        self.pushButton_new_trip.setEnabled(not self.fpe.start_detection)
-        self.pushButton_upload.setEnabled(not self.fpe.start_detection)
-        self.horizontalScrollBar_sensitivity.setEnabled(self.fpe.start_detection)
-        self.pushButton_start.setEnabled(self.fpe.start_detection)
-        self.pushButton_capture.setEnabled(self.fpe.start_detection)
+        self.pushButton_new_trip.setEnabled(not self.log_started)
+        self.pushButton_upload.setEnabled(not self.log_started)
+        self.pushButton_start.setEnabled(self.log_started)
+        self.pushButton_capture.setEnabled(self.log_started)
 
     def update_start_button(self):
-        if self.fpe.start_detection:
+        if self.log_started:
             self.pushButton_start.setText("Stop")
         else:
             self.pushButton_start.setText("Start")
@@ -144,13 +152,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.metadata = {}
             self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
             self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
-            self.start_trip_time = datetime.now().strftime("%Y%m%d%H%M%S")
-            self.trip_root_dir = 'trips'
-            self.trip_name = 'trip'
-            self.trip_dir = "%s/%s_%s" % (self.trip_root_dir, self.trip_name, self.start_trip_time)
-            create_dir_if_not_exists(self.trip_dir)
 
-            self.horizontalScrollBar_sensitivity.setEnabled(True)
             self.pushButton_start.setEnabled(True)
             self.pushButton_capture.setEnabled(True)
 
@@ -177,7 +179,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
     def save_metadata(self):
         try:
-            if self.fpe.start_detection:
+            if not self.log_started and len(self.metadata) > 0:
                 json_filename = "meta_%s_%s_%s_%s.json" % (
                     self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
                 with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
@@ -196,17 +198,17 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
         msg_str += f"Num COTS current frame: {round(results['n_objects'])} ".ljust(pad_size)
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
-        msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size)
+        # msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size) #TODO: Mike - Temp comment
         self.statusbar.showMessage(msg_str)
         
     def save_results(self, results):
-        # TODO: if no new trip: return
         # ---------- Handle image saving -----------
         # save processed frame
-        currentTime = str(round(10 * time.time()))
+        currentTime = str(round(time.time()))
         file_prefix = f"{self.trip_name}_{self.start_trip_time}_{currentTime}"
         saveSensorData = False
-        if self.fpe.start_detection and results['n_objects'] > 0: # TODO: don't check start detection, check if a trip has been created
+        if self.log_started and results['n_objects'] > 0:
+            print("Captured COTS")
             saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_processed.jpg",
@@ -222,7 +224,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
                 for label in convert_bbox_to_labels(results['boxes'], results['raw_frame']):
                     f.write(f"0 {label}\n")
 
-        if self.fpe.start_detection and self.capture_a_frame:
+        if self.log_started and self.capture_a_frame:
             saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_captured.jpg",
@@ -312,7 +314,6 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.put(results)
 
     def ask_stop_app(self, event):
-        # TODO: Skip ask if haven't started new trip
         # TODO: QMessageBox button size
         msg = QMessageBox()
         msg.setWindowTitle("Exit?")
@@ -373,8 +374,6 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         self.frame_height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
 
         self.inf_bkend = inference_backend
-        # self.start_detection = False
-        # TODO: DEBUG only reset once done -- Freeman
         self.start_detection = True
         self.detector = detector
 
@@ -397,7 +396,6 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             raw_frame = frame.copy()
             if self.start_detection:
                 results = self.inf_bkend.inference(frame)
-                results['n_objects'] = 0 # TODO: Debug only, reset once done -- Freeman
             else:
                 results = {
                     'out_frame': frame,
