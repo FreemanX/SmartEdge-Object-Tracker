@@ -286,9 +286,9 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
     <property name="geometry">
      <rect>
       <x>1335</x>
-      <y>365</y>
+      <y>355</y>
       <width>550</width>
-      <height>71</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -344,7 +344,7 @@ QScrollBar::add-line:horizontal {
     <property name="geometry">
      <rect>
       <x>1335</x>
-      <y>315</y>
+      <y>305</y>
       <width>321</width>
       <height>50</height>
      </rect>
@@ -362,7 +362,7 @@ QScrollBar::add-line:horizontal {
     <property name="geometry">
      <rect>
       <x>1590</x>
-      <y>315</y>
+      <y>305</y>
       <width>130</width>
       <height>50</height>
      </rect>
@@ -556,14 +556,14 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>1340</x>
-      <y>457</y>
+      <y>450</y>
       <width>351</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>45</pointsize>
+      <pointsize>50</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -723,9 +723,9 @@ color: rgb(9, 26, 138);</string>
     <property name="geometry">
      <rect>
       <x>1695</x>
-      <y>450</y>
+      <y>435</y>
       <width>191</width>
-      <height>40</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">

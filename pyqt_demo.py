@@ -92,7 +92,14 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_capture.clicked.connect(self.on_capture_clicked)
         self.pushButton_new_trip.clicked.connect(self.on_new_trip_clicked)
         self.pushButton_upload.clicked.connect(self.on_upload_clicked)
+        self.pushButton_reset_counter.clicked.connect(self.on_reset_counter_clicked)
+
         self.checkBox_obj_tracking.stateChanged.connect(self.on_track_cots_clicked)
+    
+    def on_reset_counter_clicked(self):
+        self.inference_backend.reset_object_count()
+        self.track_id_patch_dict = {}
+        self.label_track_cots.clear()
 
     def on_track_cots_clicked(self):
         self.inference_backend.set_enable_tracker(self.checkBox_obj_tracking.isChecked())
