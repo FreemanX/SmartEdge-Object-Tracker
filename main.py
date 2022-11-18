@@ -75,6 +75,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
     def set_ui_init_values(self):
         self.widget_error_screen.setVisible(False)
+        self.checkBox_obj_tracking.setChecked(True)
         self.inference_backend.set_confidence(0.5)
         self.update_sensitivity_label()
         self.update_start_button()
@@ -130,6 +131,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.trip_name = 'trip'
             self.trip_dir = "%s/%s_%s" % (self.trip_root_dir, self.trip_name, self.start_trip_time)
             create_dir_if_not_exists(self.trip_dir)
+            self.on_reset_counter_clicked()
         else:
             self.save_metadata()
         
@@ -198,7 +200,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
         msg_str += f"Num COTS current frame: {round(results['n_objects'])} ".ljust(pad_size)
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
-        # msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size) #TODO: Mike - Temp comment
+        if self.checkBox_obj_tracking.isChecked():
+            msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size) 
+        #TODO: Mike - Temp comment
         self.statusbar.showMessage(msg_str)
         
     def save_results(self, results):
