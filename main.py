@@ -248,7 +248,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         p_size = 140 if len(boxes) < 10 else 70
         for idx, box in enumerate(boxes):
             kp = [int(x) for x in box]
-            patch = results['raw_frame'][kp[1]:kp[3], kp[0]:kp[2]]
+            rec_range = max(kp[2] - kp[0], kp[3] - kp[1])
+            patch = results['raw_frame'][kp[1]:kp[1] + rec_range, kp[0]:kp[0] + rec_range]
             try:
                 patch = cv.resize(patch, (p_size, p_size))
             except Exception:
@@ -275,7 +276,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             if k not in self.track_id_patch_dict:
                 self.track_id_patch_dict[k] = np.zeros((100, 110, 3), dtype=np.uint8)
             try:
-                self.track_id_patch_dict[k] = cv.resize(raw[v[1]:v[3], v[0]:v[2]], (110, 100))
+                rec_range = max(v[2] - v[0], v[3] - v[1])
+                self.track_id_patch_dict[k] = cv.resize(raw[v[1]:v[1]+rec_range, v[0]:v[0]+rec_range], (110, 100))
             except Exception:
                 pass
         
