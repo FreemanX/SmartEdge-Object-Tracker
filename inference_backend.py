@@ -42,7 +42,7 @@ class InferenceBackend():
     def reset_object_count(self):
         self.yolov5_wrapper.reset_tracker()
 
-    def set_confidence(self, conf: float):
+    def set_confidence_thresh(self, conf: float):
         self.yolov5_wrapper.set_conf_thresh(conf)
 
     def get_confidence(self):

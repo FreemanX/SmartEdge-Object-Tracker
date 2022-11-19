@@ -93,7 +93,8 @@
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(46, 52, 54);
-color: rgb(255, 255, 255);</string>
+color: rgb(255, 255, 255);
+border-radius: 10px;</string>
     </property>
     <property name="text">
      <string>Camera View</string>
@@ -233,37 +234,34 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
   border-color: none;
   border-width: 1px;
   border-style: solid;
-  background-color: rgba(255, 255, 255,200);
+  background-color: rgba(255, 255, 255,240);
   width: 1px;
   margin: 0px 10px 0 10px;
  }
 
  QScrollBar::handle:horizontal {
 	border-radius:14px;
-    /*  background-color: rgba(16, 104, 106,200); */
-	
-	background-color: rgb(52, 101, 164);
-
+	background-color: rgb(114, 159, 207);
     min-height: 30px;
 	min-width: 45px;
  }
 QScrollBar::add-line:horizontal {
-    border: 1px;
+    border: 0px;
 	border-radius:5px;
-    /* background-color: rgb(76, 178, 158); */
 	
-	background-color: rgb(32, 74, 135);
+	background-color: rgb(114, 159, 207);
+	
+	
     width: 10px;
     subcontrol-position: right;
 	subcontrol-origin: margin;
  }
 
  QScrollBar::sub-line:horizontal {
-  border: 1px;
+  border: 0px;
 	border-radius:5px;
-    /* background-color: rgb(76, 178, 158); */
 	
-	background-color: rgb(32, 74, 135);
+	background-color: rgb(114, 159, 207);
     width: 10px;
     subcontrol-position: left;
 	subcontrol-origin: margin;  
@@ -274,6 +272,9 @@ QScrollBar::add-line:horizontal {
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="invertedAppearance">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -291,6 +292,9 @@ QScrollBar::add-line:horizontal {
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Detection Sensitivity:</string>
@@ -311,6 +315,9 @@ QScrollBar::add-line:horizontal {
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>0</string>
@@ -352,7 +359,8 @@ QScrollBar::add-line:horizontal {
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(211, 215, 207);</string>
+     <string notr="true">background-color: rgb(211, 215, 207);
+border-radius: 10px;</string>
     </property>
     <property name="text">
      <string/>
@@ -468,7 +476,8 @@ color: rgb(255, 255, 255);</string>
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(238, 238, 236);</string>
+     <string notr="true">border-radius: 10px;
+background-color: rgb(238, 238, 236);</string>
     </property>
     <property name="text">
      <string/>
@@ -478,16 +487,19 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>841</y>
+      <y>840</y>
       <width>1280</width>
       <height>160</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(0, 0, 0);</string>
+     <string notr="true"/>
     </property>
     <property name="text">
      <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_track_cots">
@@ -525,7 +537,8 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(9, 26, 138);</string>
+     <string notr="true">border-radius: 10px;
+background-color: rgb(9, 26, 138);</string>
     </property>
     <widget class="QLabel" name="label_4">
      <property name="geometry">
@@ -637,8 +650,7 @@ QPushButton {
 background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 255));
      border-radius: 12px;
 }
-*/
-</string>
+*/</string>
     </property>
     <property name="text">
      <string>Reset counter</string>
@@ -662,7 +674,7 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton:checked{
-     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 100));
+     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 150));
      border-radius: 20px;
 }
 QPushButton:pressed { 
@@ -689,7 +701,7 @@ border-radius: 20px;
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_show_anno_2">
+   <widget class="QPushButton" name="pushButton_object_track">
     <property name="geometry">
      <rect>
       <x>1340</x>
@@ -707,7 +719,7 @@ border-radius: 20px;
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton:checked{
-     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 100));
+     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 150));
      border-radius: 20px;
 }
 QPushButton:pressed { 
@@ -734,6 +746,27 @@ border-radius: 20px;
      <bool>false</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label_detect_bg">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>5</y>
+      <width>1300</width>
+      <height>1010</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(46, 52, 54);
+border-radius: 10px;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <zorder>label_detect_bg</zorder>
    <zorder>bg_color_2</zorder>
    <zorder>header_bg_color</zorder>
    <zorder>bg_color</zorder>
@@ -754,7 +787,7 @@ border-radius: 20px;
    <zorder>horizontalScrollBar_sensitivity</zorder>
    <zorder>label_sensitivity</zorder>
    <zorder>pushButton_show_anno</zorder>
-   <zorder>pushButton_show_anno_2</zorder>
+   <zorder>pushButton_object_track</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
