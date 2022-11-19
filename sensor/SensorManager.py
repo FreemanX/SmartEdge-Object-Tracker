@@ -1,11 +1,12 @@
 from sensor.DHT import DHT
+from sensor.GPS import GPS
 from libs.ThreadRunnable import ThreadRunnable
 
 
 class SensorManager(ThreadRunnable):
     def __init__(self):
         super().__init__()
-        self.sensor_list = [DHT()]
+        self.sensor_list = [DHT(), GPS()]
         self.sensors_data = {}
 
     def get_sensor_reading(self, what: str):

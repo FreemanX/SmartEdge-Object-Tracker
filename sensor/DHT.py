@@ -11,10 +11,10 @@ class DHT(Sensor):
     def get_reading_from_hardware(self):
         alpha = 0.01
         if 'temperature' not in self.reading_dict:
-            self.reading_dict['temperature'] = random.randrange(150, 250) / 10
+            self.reading_dict['temperature'] = round(random.randrange(150, 250) / 10, 1)
         else:
-            self.reading_dict['temperature'] = self.reading_dict['temperature'] * \
-                (1-alpha) + random.randrange(100, 300)/10 * alpha
+            self.reading_dict['temperature'] = round(self.reading_dict['temperature'] * \
+                (1-alpha) + random.randrange(100, 300)/10 * alpha, 1)
 
     def on_start(self):
         """
