@@ -320,12 +320,15 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.put(results)
 
     def ask_stop_app(self, event):
-        # TODO: QMessageBox button size
         msg = QMessageBox()
         msg.setWindowTitle("Exit?")
         msg.setText("Confirm exit this application?")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
+        font = msg.font()
+        font.setBold(True)
+        font.setPointSize(50)
+        msg.setFont(font)
         ret = msg.exec_()
         if ret == QMessageBox.Ok:
             Log.info("Program exit.")
