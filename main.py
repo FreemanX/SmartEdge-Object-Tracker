@@ -185,8 +185,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def save_metadata(self):
         try:
             if not self.log_started and len(self.metadata) > 0:
-                json_filename = "meta_%s_%s_%s_%s.json" % (
-                    self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
+                json_filename = "meta_%s_%s_%s_%s_%s.json" % (
+                    self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'], self.metadata['cots_count'])
                 with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
                     json.dump(self.metadata, outfile)
                 self.metadata = {}
