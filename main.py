@@ -66,26 +66,28 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.trip_root_dir = 'trips'
             self.trip_name = 'trip'
 
-            self.set_ui_init_values()
-            self.set_ui_init_behaviour()
             self.set_ui_actions()
+            self.set_ui_init_values()
         except Exception as e:
             Log.warning(e)
             self.fpe = None
             self.widget_error_screen.setVisible(True)
+            Log.error(e)
         self.exit_code = 0
         self.pushButton_exit.clicked.connect(lambda: self.MainWindow.close())
 
     def set_ui_init_values(self):
         self.widget_error_screen.setVisible(False)
-        self.checkBox_obj_tracking.setChecked(True)
-        self.inference_backend.set_confidence(0.5)
+        self.inference_backend.set_confidence_thresh(0.4)
         self.update_sensitivity_label()
         self.update_start_button()
-
-    def set_ui_init_behaviour(self):
         self.pushButton_start.setEnabled(False)
         self.pushButton_capture.setEnabled(False)
+
+        self.pushButton_object_track.setChecked(True)
+        self.pushButton_object_track.setText("Tracking COTS")
+        self.pushButton_show_anno.setChecked(True)
+        self.pushButton_show_anno.setText("Showing Annotation")
 
     def set_ui_actions(self):
         # ---------  Sample Action
@@ -102,7 +104,16 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_reboot.clicked.connect(self.on_reboot_button_clicked)
         self.pushButton_poweroff.clicked.connect(self.on_poweroff_button_clicked)
 
-        self.checkBox_obj_tracking.stateChanged.connect(self.on_track_cots_clicked)
+        self.pushButton_object_track.clicked.connect(self.on_track_cots_clicked)
+        self.pushButton_show_anno.clicked.connect(self.on_show_anno_clicked)
+        
+    def on_show_anno_clicked(self):
+        self.fpe.annotate = not self.fpe.annotate
+        if self.fpe.annotate:
+            self.pushButton_show_anno.setText("Showing Annotation")
+        else:
+            self.pushButton_show_anno.setText("Show Annotation")
+        self.pushButton_show_anno.setChecked(self.fpe.annotate)    
     
     def on_reboot_button_clicked(self):
         self.exit_code = 888;
@@ -118,7 +129,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.label_track_cots.clear()
 
     def on_track_cots_clicked(self):
-        self.inference_backend.set_enable_tracker(self.checkBox_obj_tracking.isChecked())
+        self.inference_backend.set_enable_tracker(not self.inference_backend.get_enable_tracker())
+        if self.inference_backend.get_enable_tracker():
+            self.pushButton_object_track.setText("Tracking COTS")
+        else:
+            self.pushButton_object_track.setText("Track COTS")
+        self.pushButton_object_track.setChecked(self.inference_backend.get_enable_tracker())
 
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
@@ -169,7 +185,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
     def on_sensitivity_change(self):
         conf_val = (100 - self.horizontalScrollBar_sensitivity.value()) / 100
-        self.inference_backend.set_confidence(conf_val)
+        self.inference_backend.set_confidence_thresh(conf_val)
         self.update_sensitivity_label()
 
     def update_sensitivity_label(self):
@@ -199,11 +215,13 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def update_status_bar(self, results):
         # Example: show info on status bar.
         pad_size = 35
-        msg_str = f"FPS: {results['fps']} ".ljust(pad_size)
+        msg_str = f"  FPS: {results['fps']} ".ljust(pad_size)
         msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
         msg_str += f"Num COTS current frame: {round(results['n_objects'])} ".ljust(pad_size)
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
 
+        if self.pushButton_object_track.isChecked():
+            msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size) 
         self.statusbar.showMessage(msg_str)
         
     def save_results(self, results):
@@ -242,15 +260,14 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         if saveSensorData:
             self.metadata[currentTime] = {}
             self.metadata[currentTime]['temperature'] = self.sensor_manager.get_sensor_reading('temperature')
+
         
     def show_objects_current_frame(self, results):
         # ---------- Displaying COTS -----------
-        cots_patch = np.zeros((140, 1260, 3), dtype=np.uint8)
-        # boxes = sorted(results['boxes'][:36], key=lambda b: b[0])
-        # p_size = 140 if len(boxes) < 10 else 70
-        boxes = sorted(results['boxes'][:9], key=lambda b: b[1], reverse=True)
+        cots_patch = np.zeros((160, 1280, 3), dtype=np.uint8)
+        boxes = sorted(results['boxes'][:8], key=lambda b: b[1], reverse=True)
         boxes = sorted(boxes, key=lambda b: b[0])
-        p_size = 140 if len(boxes) < 10 else 70
+        p_size = 160
         for idx, box in enumerate(boxes):
             kp = [int(x) for x in box]
             rec_range = max(kp[2] - kp[0], kp[3] - kp[1])
@@ -259,44 +276,44 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
                 patch = cv.resize(patch, (p_size, p_size))
             except Exception:
                 pass
-            x_pos = idx * p_size if p_size == 140 else (idx % 18) * p_size
-            y_pox = 0 if p_size == 140 else idx // 18 * p_size
-            cots_patch[y_pox:y_pox+p_size, x_pos:x_pos+p_size, :] = patch[:, :, :]
+            x_pos = idx * p_size
+            y_pox = 0
+            cots_patch[y_pox:y_pox+p_size, x_pos:x_pos+p_size] = patch[:, :]
 
-        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 140))
+        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 1260, 160))
         self.label_cots.setPixmap(patch_qt)
         
     def show_tracked_objects(self, results):
         """
-        Total drawable space is (500, 550)
-        each patch is of size (100, 110) pixels (h, w)
-        5x5 = 25 most recent detections will be shown in the UI
+        Total drawable space is (660, 550)
+        each patch is of size (110, 110) pixels (h, w)
+        6x5 = 30 most recent detections will be shown in the UI
         """
         # ---------- Tracking COTS -------------
-        if not self.checkBox_obj_tracking.isChecked():
+        if not self.pushButton_object_track.isChecked():
             return
         raw = results['raw_frame']
-        cots_patch = np.zeros((500, 550, 3), dtype=np.uint8)
         for k, v in results['track_dict'].items():
             if k not in self.track_id_patch_dict:
-                self.track_id_patch_dict[k] = np.zeros((100, 110, 3), dtype=np.uint8)
+                self.track_id_patch_dict[k] = np.zeros((110, 110, 3), dtype=np.uint8)
             try:
                 rec_range = max(v[2] - v[0], v[3] - v[1])
-                self.track_id_patch_dict[k] = cv.resize(raw[v[1]:v[1]+rec_range, v[0]:v[0]+rec_range], (110, 100))
+                self.track_id_patch_dict[k] = cv.resize(raw[v[1]:v[1]+rec_range, v[0]:v[0]+rec_range], (110, 110))
             except Exception:
                 pass
         
-        self.track_id_patch_dict = dict(sorted(self.track_id_patch_dict.items(), reverse=True)[:25])
+        cots_patch = np.zeros((660, 550, 3), dtype=np.uint8)
+        self.track_id_patch_dict = dict(sorted(self.track_id_patch_dict.items(), reverse=True)[:30])
         for idx, (id, patch) in enumerate(self.track_id_patch_dict.items()):
-            row = (idx // 5) * 100
+            row = (idx // 5) * 110
             col = (idx % 5) * 110
-            cots_patch[row:row+100, col:col+110] = patch
+            cots_patch[row:row+110, col:col+110] = patch
             bcolor = COLOR_PALETTE[id % len(COLOR_PALETTE)]
-            cv.rectangle(cots_patch, (col+2, row+2), (col+108, row+98), bcolor, 4)
+            cv.rectangle(cots_patch, (col+2, row+2), (col+108, row+108), bcolor, 4)
             cv.rectangle(cots_patch, (col+2, row+2), (col+35, row+20), bcolor, -1)
             cv.putText(cots_patch, str(id), (col+2, row+14), cv2.FONT_HERSHEY_SIMPLEX, 0.5, [255, 255, 255], 1)
         
-        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 550, 500))
+        patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 550, 660))
         self.label_track_cots.setPixmap(patch_qt)
         
     def update_results_metadata(self, results):
@@ -386,13 +403,15 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         self.frame_height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
 
         self.inf_bkend = inference_backend
-        self.start_detection = True
+        self.annotate = True
+        self.detector = detector
+
 
     def run(self):  # Implement QThread function
         while self.thread_run:
             timer = time.time()
             ret, frame = self.cap.read()
-            if self.vid_mode and not self.start_detection:
+            if self.vid_mode:
                 time.sleep(0.043333)
             if not ret and self.vid_mode:
                 Log.info(f"End of video reached, reset to the first frame.")
@@ -405,29 +424,20 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             if frame is None:
                 continue
             raw_frame = frame.copy()
-            if self.start_detection:
-                results = self.inf_bkend.inference(frame)
-            else:
-                results = {
-                    'out_frame': frame,
-                    'inference_time': 0,
-                    'n_objects': 0,
-                    'boxes': []
-                }
+            results = self.inf_bkend.inference(frame)
             # copy an instance for display
             out_frame = results['out_frame'].copy()
             results['raw_frame'] = raw_frame
             results['total_time'] = time.time() - timer
-            try:
-                results['fps'] = round(
-                    1/results['inference_time']) if self.start_detection else 0
-            except ZeroDivisionError:  # just be safe
-                results['fps'] = 0
+            results['fps'] = round(1 / results['inference_time'])
             self.put(results)
-            # ; separated text, ; is line separator.
-            if self.start_detection:
+            
+
+            if self.annotate:
                 temperature = self.sensor_manager.get_sensor_reading('temperature')
+                # ; separated text, ; is line separator.
                 frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']};Temperature: {temperature}"
+
                 if self.inf_bkend.get_enable_tracker():
                     frame_text += f";COTS Count: {results['cots_cnt']}"
                 out_frame = add_text_to_frame(out_frame, frame_text)
