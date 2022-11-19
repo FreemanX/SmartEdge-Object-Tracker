@@ -404,7 +404,6 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
 
         self.inf_bkend = inference_backend
         self.annotate = True
-        self.detector = detector
 
 
     def run(self):  # Implement QThread function
