@@ -172,6 +172,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.metadata = {}
             self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
             self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
+            self.metadata['temperature'] = []
             self.metadata['cots_count'] = 0
 
             self.pushButton_start.setEnabled(True)
@@ -258,9 +259,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 
         # Save sensor data into metadata
         if saveSensorData:
-            self.metadata[currentTime] = {}
-            self.metadata[currentTime]['temperature'] = self.sensor_manager.get_sensor_reading('temperature')
-
+            temperatureObj = {'timestamp': currentTime, 'reading': self.sensor_manager.get_sensor_reading('temperature')}
+            self.metadata['temperature'].append(temperatureObj)
         
     def show_objects_current_frame(self, results):
         # ---------- Displaying COTS -----------
