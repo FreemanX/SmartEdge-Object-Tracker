@@ -194,7 +194,7 @@ class Yolov5TRT(object):
         self.categories = categories
         self.conf_thresh = 0.5
 
-        self.enable_tracker = False
+        self.enable_tracker = True
         self.reset_tracker()
 
         # Deserialize the engine from file

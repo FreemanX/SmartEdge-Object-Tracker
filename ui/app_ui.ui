@@ -58,7 +58,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>20</y>
       <width>1280</width>
       <height>720</height>
      </rect>
@@ -108,7 +108,7 @@ color: rgb(255, 255, 255);</string>
       <x>1719</x>
       <y>10</y>
       <width>181</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -127,75 +127,11 @@ color: rgb(255, 255, 255);</string>
      <string>Exit</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_logo">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>30</y>
-      <width>191</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>250</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>res/unsw_logo.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_app">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>40</y>
-      <width>1100</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>75</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Crown-of-Thorns Starfish Realtime Detector</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_team">
-    <property name="geometry">
-     <rect>
-      <x>1040</x>
-      <y>100</y>
-      <width>261</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>30</pointsize>
-      <italic>true</italic>
-     </font>
-    </property>
-    <property name="text">
-     <string>COMP6733 Team SmartEdge</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_start">
     <property name="geometry">
      <rect>
       <x>1340</x>
-      <y>185</y>
+      <y>175</y>
       <width>260</width>
       <height>50</height>
      </rect>
@@ -229,7 +165,7 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
     <property name="geometry">
      <rect>
       <x>1630</x>
-      <y>185</y>
+      <y>175</y>
       <width>260</width>
       <height>50</height>
      </rect>
@@ -263,7 +199,7 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
     <property name="geometry">
      <rect>
       <x>1340</x>
-      <y>125</y>
+      <y>115</y>
       <width>260</width>
       <height>50</height>
      </rect>
@@ -285,9 +221,9 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
    <widget class="QScrollBar" name="horizontalScrollBar_sensitivity">
     <property name="geometry">
      <rect>
-      <x>1335</x>
-      <y>355</y>
-      <width>550</width>
+      <x>780</x>
+      <y>760</y>
+      <width>481</width>
       <height>61</height>
      </rect>
     </property>
@@ -343,8 +279,8 @@ QScrollBar::add-line:horizontal {
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>1335</x>
-      <y>305</y>
+      <x>460</x>
+      <y>765</y>
       <width>321</width>
       <height>50</height>
      </rect>
@@ -352,6 +288,8 @@ QScrollBar::add-line:horizontal {
     <property name="font">
      <font>
       <pointsize>40</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
      </font>
     </property>
     <property name="text">
@@ -361,8 +299,8 @@ QScrollBar::add-line:horizontal {
    <widget class="QLabel" name="label_sensitivity">
     <property name="geometry">
      <rect>
-      <x>1590</x>
-      <y>305</y>
+      <x>740</x>
+      <y>765</y>
       <width>130</width>
       <height>50</height>
      </rect>
@@ -382,7 +320,7 @@ QScrollBar::add-line:horizontal {
     <property name="geometry">
      <rect>
       <x>1630</x>
-      <y>125</y>
+      <y>115</y>
       <width>260</width>
       <height>50</height>
      </rect>
@@ -405,9 +343,9 @@ QScrollBar::add-line:horizontal {
     <property name="geometry">
      <rect>
       <x>1319</x>
-      <y>260</y>
+      <y>250</y>
       <width>581</width>
-      <height>741</height>
+      <height>751</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -425,7 +363,7 @@ QScrollBar::add-line:horizontal {
      <rect>
       <x>0</x>
       <y>20</y>
-      <width>1301</width>
+      <width>611</width>
       <height>101</height>
      </rect>
     </property>
@@ -449,7 +387,7 @@ QScrollBar::add-line:horizontal {
       <x>1520</x>
       <y>10</y>
       <width>181</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -474,7 +412,7 @@ color: rgb(255, 255, 255);</string>
       <x>1320</x>
       <y>10</y>
       <width>181</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -497,7 +435,7 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>1330</x>
-      <y>75</y>
+      <y>65</y>
       <width>301</width>
       <height>50</height>
      </rect>
@@ -521,7 +459,7 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>1320</x>
-      <y>80</y>
+      <y>70</y>
       <width>580</width>
       <height>170</height>
      </rect>
@@ -540,9 +478,9 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>862</y>
+      <y>841</y>
       <width>1280</width>
-      <height>140</height>
+      <height>160</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -550,38 +488,15 @@ color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox_obj_tracking">
-    <property name="geometry">
-     <rect>
-      <x>1340</x>
-      <y>450</y>
-      <width>351</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>50</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QCheckBox::indicator { width: 30px; height: 30px;}</string>
-    </property>
-    <property name="text">
-     <string> Track COTS</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_track_cots">
     <property name="geometry">
      <rect>
       <x>1335</x>
-      <y>495</y>
+      <y>329</y>
       <width>550</width>
-      <height>500</height>
+      <height>660</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -589,30 +504,6 @@ color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>1330</x>
-      <y>260</y>
-      <width>381</width>
-      <height>50</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>50</pointsize>
-      <weight>75</weight>
-      <italic>false</italic>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Detection Control Panel</string>
     </property>
    </widget>
    <widget class="QWidget" name="widget_error_screen" native="true">
@@ -622,7 +513,7 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>20</y>
       <width>1280</width>
       <height>720</height>
      </rect>
@@ -723,7 +614,7 @@ color: rgb(9, 26, 138);</string>
     <property name="geometry">
      <rect>
       <x>1695</x>
-      <y>435</y>
+      <y>265</y>
       <width>191</width>
       <height>51</height>
      </rect>
@@ -753,30 +644,117 @@ background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5
      <string>Reset counter</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_show_anno">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>755</y>
+      <width>321</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>40</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton:checked{
+     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 100));
+     border-radius: 20px;
+}
+QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(76, 178, 158, 255), stop:1 rgba(76, 255, 0, 0));
+	color: rgb(0, 0, 0);
+border-radius: 20px;
+}
+QPushButton {
+    background-color: rgb(184, 184, 184);
+ 	border-radius: 20px;
+}QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(76, 178, 158, 255), stop:1 rgba(76, 255, 0, 0));
+	color: rgb(0, 0, 0);
+border-radius: 20px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Show Annotation</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_show_anno_2">
+    <property name="geometry">
+     <rect>
+      <x>1340</x>
+      <y>265</y>
+      <width>271</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>40</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton:checked{
+     background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(0, 253, 114, 255), stop:1 rgba(76, 255, 114, 100));
+     border-radius: 20px;
+}
+QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(76, 178, 158, 255), stop:1 rgba(76, 255, 0, 0));
+	color: rgb(0, 0, 0);
+border-radius: 20px;
+}
+QPushButton {
+    background-color: rgb(184, 184, 184);
+ 	border-radius: 20px;
+}QPushButton:pressed { 
+background-color: qlineargradient(spread:pad, x1:0.483727, y1:1, x2:0.495, y2:0, stop:0 rgba(76, 178, 158, 255), stop:1 rgba(76, 255, 0, 0));
+	color: rgb(0, 0, 0);
+border-radius: 20px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Track COTS</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
    <zorder>bg_color_2</zorder>
    <zorder>header_bg_color</zorder>
    <zorder>bg_color</zorder>
    <zorder>label_camview</zorder>
    <zorder>pushButton_exit</zorder>
-   <zorder>label_logo</zorder>
-   <zorder>label_app</zorder>
-   <zorder>label_team</zorder>
    <zorder>pushButton_start</zorder>
    <zorder>pushButton_capture</zorder>
    <zorder>pushButton_new_trip</zorder>
-   <zorder>horizontalScrollBar_sensitivity</zorder>
-   <zorder>label</zorder>
-   <zorder>label_sensitivity</zorder>
    <zorder>pushButton_upload</zorder>
    <zorder>pushButton_reboot</zorder>
    <zorder>pushButton_poweroff</zorder>
    <zorder>label_2</zorder>
    <zorder>label_cots</zorder>
-   <zorder>checkBox_obj_tracking</zorder>
    <zorder>label_track_cots</zorder>
-   <zorder>label_3</zorder>
    <zorder>widget_error_screen</zorder>
    <zorder>pushButton_reset_counter</zorder>
+   <zorder>label</zorder>
+   <zorder>horizontalScrollBar_sensitivity</zorder>
+   <zorder>label_sensitivity</zorder>
+   <zorder>pushButton_show_anno</zorder>
+   <zorder>pushButton_show_anno_2</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
