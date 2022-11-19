@@ -1,7 +1,7 @@
 from sensor.DHT import DHT
 from sensor.GPS import GPS
 from libs.ThreadRunnable import ThreadRunnable
-
+import time
 
 class SensorManager(ThreadRunnable):
     def __init__(self):
@@ -20,6 +20,7 @@ class SensorManager(ThreadRunnable):
         for s in self.sensor_list:
             for k, v in s.get_readings().items():
                 self.sensors_data[k] = v
+        time.sleep(2)
 
     def on_end(self):
         for s in self.sensor_list:
