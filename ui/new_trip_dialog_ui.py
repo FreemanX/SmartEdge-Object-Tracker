@@ -15,7 +15,7 @@ class Ui_NewTripDialog(object):
     def setupUi(self, NewTripDialog):
         NewTripDialog.setObjectName("NewTripDialog")
         NewTripDialog.setWindowModality(QtCore.Qt.ApplicationModal)
-        NewTripDialog.resize(1079, 340)
+        NewTripDialog.resize(500, 150)
         font = QtGui.QFont()
         font.setFamily("DejaVu Sans")
         font.setPointSize(40)
@@ -67,7 +67,7 @@ class Ui_NewTripDialog(object):
     def retranslateUi(self, NewTripDialog):
         _translate = QtCore.QCoreApplication.translate
         NewTripDialog.setWindowTitle(_translate("NewTripDialog", "Dialog"))
-        self.label_header.setText(_translate("NewTripDialog", "New Log"))
+        self.label_header.setText(_translate("NewTripDialog", "New Trip"))
         self.label_longitude.setText(_translate("NewTripDialog", "Longitude"))
         self.pushButton_getGPS.setText(_translate("NewTripDialog", "Get GPS"))
         self.label_latitude.setText(_translate("NewTripDialog", "Latitude"))

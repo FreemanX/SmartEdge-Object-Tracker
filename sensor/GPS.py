@@ -1,20 +1,16 @@
 from sensor.Sensor import Sensor
-import random
 import time
+from random import uniform
 
-# class DHT
-class DHT(Sensor):
+# class GPS
+class GPS(Sensor):
     def __init__(self):
         super().__init__()
         self.set_daemon()
 
     def get_reading_from_hardware(self):
-        alpha = 0.01
-        if 'temperature' not in self.reading_dict:
-            self.reading_dict['temperature'] = round(random.randrange(150, 250) / 10, 1)
-        else:
-            self.reading_dict['temperature'] = round(self.reading_dict['temperature'] * \
-                (1-alpha) + random.randrange(100, 300)/10 * alpha, 1)
+        self.reading_dict['latitude'] = str(round(uniform(-18.456, -14.750), 6))
+        self.reading_dict['longitude'] = str(round(uniform(146.629, 151.033), 6))
 
     def on_start(self):
         """
@@ -26,7 +22,7 @@ class DHT(Sensor):
         What to run in thread while loop
         """
         self.update_reading()  # call function from super class
-        time.sleep(2)
+        time.sleep(5)
 
     def on_end(self):
         """

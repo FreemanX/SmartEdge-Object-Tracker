@@ -41,6 +41,9 @@ class UploadTripDialog(QDialog):
 
     def setupTableWidget(self):
         self.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        
+        self.ui.tableWidget.setStyleSheet("QAbstractItemView::indicator { width: 20px;height:20px;} QTableWidget::item{width: 20px;height: 20px;} ")
+
         folderList, dateList = self.obtainTripsDetail()
         for i in range(len(dateList)):
             qDateTime = QDateTime.fromString(dateList[i], "yyyyMMddHHmmss")
@@ -100,6 +103,10 @@ class UploadTripDialog(QDialog):
         msgBox.setWindowTitle("Error")
         msgBox.setText(str(error))
         msgBox.setStandardButtons(QMessageBox.Ok)
+        font = msgBox.font()
+        font.setBold(True)
+        font.setPointSize(50)
+        msgBox.setFont(font)
         msgBox.exec()
 
     def accept(self):

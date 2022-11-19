@@ -16,6 +16,7 @@ from cloud.upload import *
 from inference_backend import *
 from libs.utils import *
 from libs.Log import Log
+from sensor.SensorManager import SensorManager
 
 from ui.new_trip import NewTripDialog
 from ui.upload_trip import UploadTripDialog
@@ -53,11 +54,12 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.MainWindow.setWindowFlag(Qt.WindowMinimizeButtonHint, False)
 
         self.capture_a_frame = False
-        self.current_temperature = get_initial_temperature()
         self.inference_backend = InferenceBackend()
+        self.sensor_manager = SensorManager()
         self.log_started = False
         try:  # if camera is working or video files can be loaded
-            self.fpe = FrameProcessingEngine(self.inference_backend, self, video_file)
+            self.fpe = FrameProcessingEngine(self.inference_backend, self.sensor_manager, video_file)
+            self.sensor_manager.thread_start()
             self.track_id_patch_dict = {}
             self.metadata = {}
             self.start_trip_time = ''
@@ -67,6 +69,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.set_ui_actions()
             self.set_ui_init_values()
         except Exception as e:
+            Log.warning(e)
             self.fpe = None
             self.widget_error_screen.setVisible(True)
             Log.error(e)
@@ -136,7 +139,6 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def on_capture_clicked(self):
         self.pushButton_capture.setText("Capturing")
         self.pushButton_capture.setEnabled(False)
-        # TODO  (freeman: what to do?)
         self.capture_a_frame = True
 
     def on_start_clicked(self):
@@ -164,12 +166,13 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.pushButton_start.setText("Start")
 
     def on_new_trip_clicked(self):
-        self.newTripDialog = NewTripDialog()
+        self.newTripDialog = NewTripDialog(None, self.sensor_manager)
         result = self.newTripDialog.exec()
         if result == QDialog.Accepted:
             self.metadata = {}
             self.metadata['latitude'] = self.newTripDialog.ui.lineEdit_latitude.text()
             self.metadata['longitude'] = self.newTripDialog.ui.lineEdit_longitude.text()
+            self.metadata['cots_count'] = 0
 
             self.pushButton_start.setEnabled(True)
             self.pushButton_capture.setEnabled(True)
@@ -198,8 +201,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
     def save_metadata(self):
         try:
             if not self.log_started and len(self.metadata) > 0:
-                json_filename = "meta_%s_%s_%s_%s.json" % (
-                    self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'])
+                json_filename = "meta_%s_%s_%s_%s_%s.json" % (
+                    self.trip_name, self.start_trip_time, self.metadata['latitude'], self.metadata['longitude'], self.metadata['cots_count'])
                 with open("%s/%s" % (self.trip_dir, json_filename), "w") as outfile:
                     json.dump(self.metadata, outfile)
                 self.metadata = {}
@@ -216,9 +219,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg_str += f"Inference Time: {round(results['inference_time'] * 1000, 2)}ms ".ljust(pad_size)
         msg_str += f"Num COTS current frame: {round(results['n_objects'])} ".ljust(pad_size)
         msg_str += f"End-to-end time: {round(results['total_time'] * 1000, 2)}ms".ljust(pad_size)
+
         if self.pushButton_object_track.isChecked():
             msg_str += f"COTS count: {results['cots_cnt']}".ljust(pad_size) 
-        #TODO: Mike - Temp comment
         self.statusbar.showMessage(msg_str)
         
     def save_results(self, results):
@@ -228,7 +231,6 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         file_prefix = f"{self.trip_name}_{self.start_trip_time}_{currentTime}"
         saveSensorData = False
         if self.log_started and results['n_objects'] > 0:
-            print("Captured COTS")
             saveSensorData = True
             cv.imwrite(
                 f"{self.trip_dir}/{file_prefix}_processed.jpg",
@@ -257,7 +259,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         # Save sensor data into metadata
         if saveSensorData:
             self.metadata[currentTime] = {}
-            self.metadata[currentTime]['temperature'] = round(self.current_temperature, 1)
+            self.metadata[currentTime]['temperature'] = self.sensor_manager.get_sensor_reading('temperature')
+
         
     def show_objects_current_frame(self, results):
         # ---------- Displaying COTS -----------
@@ -313,7 +316,9 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         patch_qt = QPixmap.fromImage(cvt_cv_to_qt(cots_patch, 550, 660))
         self.label_track_cots.setPixmap(patch_qt)
         
-        
+    def update_results_metadata(self, results):
+        if self.log_started:
+            self.metadata['cots_count'] = results['cots_cnt']
 
     def process_results(self):
         """
@@ -327,16 +332,20 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.show_objects_current_frame(results)
         self.save_results(results)
         self.show_tracked_objects(results)
+        self.update_results_metadata(results)
 
         self.put(results)
 
     def ask_stop_app(self, event):
-        # TODO: QMessageBox button size
         msg = QMessageBox()
         msg.setWindowTitle("Exit?")
         msg.setText("Confirm exit this application?")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
+        font = msg.font()
+        font.setBold(True)
+        font.setPointSize(50)
+        msg.setFont(font)
         ret = msg.exec_()
         if ret == QMessageBox.Ok:
             Log.info("Program exit.")
@@ -353,6 +362,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.save_metadata()
             self.fpe.thread_run = False
             self.fpe.exit(0)
+        if self.sensor_manager:
+            self.sensor_manager.thread_stop()
         time.sleep(3)
         Log.info(f"Exiting procedure done.")
 
@@ -373,12 +384,13 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
 class FrameProcessingEngine(QThread, BufferPackedResult):
     sig_source = pyqtSignal(QImage)
 
-    def __init__(self, inference_backend: InferenceBackend, detector: DetectorApp, vid_file: None):
+    def __init__(self, inference_backend: InferenceBackend, sensor_manager: SensorManager, vid_file: None):
         QThread.__init__(self)
         BufferPackedResult.__init__(self)
         self.thread_run = True
         self.vid_mode = False
         self.vid_file = vid_file
+        self.sensor_manager = sensor_manager
         if not vid_file:  # see if we want demo on a video file
             self.cap = cv.VideoCapture(gstreamer_pipeline())
         else:
@@ -393,6 +405,7 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
         self.inf_bkend = inference_backend
         self.annotate = True
         self.detector = detector
+
 
     def run(self):  # Implement QThread function
         while self.thread_run:
@@ -418,11 +431,13 @@ class FrameProcessingEngine(QThread, BufferPackedResult):
             results['total_time'] = time.time() - timer
             results['fps'] = round(1 / results['inference_time'])
             self.put(results)
-            # ; separated text, ; is line separator.
+            
+
             if self.annotate:
-                self.detector.current_temperature = get_next_temperature(
-                    self.detector.current_temperature)
-                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']};Temperature: {round(self.detector.current_temperature, 1)}"
+                temperature = self.sensor_manager.get_sensor_reading('temperature')
+                # ; separated text, ; is line separator.
+                frame_text = f"COTS: {results['n_objects']}; FPS: {results['fps']};Temperature: {temperature}"
+
                 if self.inf_bkend.get_enable_tracker():
                     frame_text += f";COTS Count: {results['cots_cnt']}"
                 out_frame = add_text_to_frame(out_frame, frame_text)
