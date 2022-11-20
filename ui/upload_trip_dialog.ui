@@ -98,6 +98,12 @@
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>50</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>50</number>
+     </attribute>
      <column>
       <property name="text">
        <string>Date</string>

@@ -9,8 +9,13 @@ class GPS(Sensor):
         self.set_daemon()
 
     def get_reading_from_hardware(self):
-        self.reading_dict['latitude'] = str(round(uniform(-18.456, -14.750), 6))
-        self.reading_dict['longitude'] = str(round(uniform(146.629, 151.033), 6))
+        m = -1.5665739266392407
+        x = round(uniform(-18.317655, -21.791883), 6)
+        c = 118.13548027982709 + round(uniform(0.003, 0.009), 6)
+        y = round(m * x + c, 6)
+
+        self.reading_dict['latitude'] = str(x)
+        self.reading_dict['longitude'] = str(y)
 
     def on_start(self):
         """
