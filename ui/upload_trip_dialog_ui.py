@@ -58,6 +58,8 @@ class Ui_NewTripDialog(object):
         self.tableWidget.horizontalHeader().setMinimumSectionSize(70)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.verticalHeader().setDefaultSectionSize(50)
+        self.tableWidget.verticalHeader().setMinimumSectionSize(50)
         self.gridLayout.addWidget(self.tableWidget, 1, 0, 1, 3)
 
         self.retranslateUi(NewTripDialog)
