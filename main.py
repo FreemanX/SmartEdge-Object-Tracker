@@ -343,10 +343,10 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
         font = msg.font()
-        font.setBold(True)
         font.setPointSize(50)
         msg.setFont(font)
         ret = msg.exec_()
+        msg.setStyleSheet("")
         if ret == QMessageBox.Ok:
             Log.info("Program exit.")
             self.qt_app.closeAllWindows()
