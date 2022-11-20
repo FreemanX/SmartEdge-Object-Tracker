@@ -68,6 +68,10 @@ def get_all_files(dir_path: str):
     files = list(next(walk(dir_path))[2])
     return files
 
+def delete_file(dir_path: str, file_name: str):
+    if not path_exist(dir_path):
+        return
+    os.system(f"rm {dir_path}/{file_name}")
 
 # time related
 _DATE_FORMAT = '%Y%m%d %H:%M:%S'

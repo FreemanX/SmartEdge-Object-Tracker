@@ -4,9 +4,10 @@ import numpy as np
 import queue
 import typing
 import json
+import threading
 from datetime import datetime
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox, QDialog
 
@@ -21,6 +22,10 @@ from sensor.SensorManager import SensorManager
 from ui.new_trip import NewTripDialog
 from ui.upload_trip import UploadTripDialog
 
+class Helper(QObject):
+    stop_complete_signal = pyqtSignal()
+
+helper = Helper()
 
 class BufferPackedResult:
     def __init__(self, buffer_size=2):
@@ -57,6 +62,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.inference_backend = InferenceBackend()
         self.sensor_manager = SensorManager()
         self.log_started = False
+        self.reset_timestamp = 0
+        self.running_thread_list = []
         try:  # if camera is working or video files can be loaded
             self.fpe = FrameProcessingEngine(self.inference_backend, self.sensor_manager, video_file)
             self.sensor_manager.thread_start()
@@ -116,14 +123,15 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         self.pushButton_show_anno.setChecked(self.fpe.annotate)    
     
     def on_reboot_button_clicked(self):
-        self.exit_code = 888;
+        self.exit_code = 888
         self.MainWindow.close()
 
     def on_poweroff_button_clicked(self):
-        self.exit_code = 999;
+        self.exit_code = 999
         self.MainWindow.close()
     
     def on_reset_counter_clicked(self):
+        self.reset_timestamp = str(round(time.time()))
         self.inference_backend.reset_object_count()
         self.track_id_patch_dict = {}
         self.label_track_cots.clear()
@@ -150,9 +158,25 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.trip_dir = "%s/%s_%s" % (self.trip_root_dir, self.trip_name, self.start_trip_time)
             create_dir_if_not_exists(self.trip_dir)
             self.on_reset_counter_clicked()
+            self.update_start_button_action()
         else:
+            # Remove images before counter resetted
+            if self.reset_timestamp != 0:
+                thr = threading.Thread(target=self.remove_outdated_images)
+                helper.stop_complete_signal.connect(self.onStopCompleteSignal)
+                self.pushButton_start.setText("Saving...")
+                self.pushButton_start.setEnabled(False)
+                self.pushButton_capture.setEnabled(False)
+                self.running_thread_list.append(thr)
+                thr.start()
+            
+            # Save metadata
             self.save_metadata()
+
+    def onStopCompleteSignal(self):
+        self.update_start_button_action()
         
+    def update_start_button_action(self):
         self.update_start_button()
         self.pushButton_new_trip.setEnabled(not self.log_started)
         self.pushButton_upload.setEnabled(not self.log_started)
@@ -212,6 +236,19 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
                 self.label_camview.setText('Camera View')
         except Exception as e:
             Log.error(f"Saving metadata error: {e}")
+
+    def remove_outdated_images(self):
+        if self.reset_timestamp != 0:
+            file_list = get_all_files(self.trip_dir)
+            for file in file_list:
+                splitted_str = file.split('.')
+                if splitted_str[1] != 'json' and \
+                    splitted_str[0].split('_')[2] < self.reset_timestamp:
+                        delete_file(self.trip_dir, file)
+
+            self.reset_timestamp = 0
+            helper.stop_complete_signal.emit()
+
 
     def update_status_bar(self, results):
         # Example: show info on status bar.
@@ -364,6 +401,8 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
             self.fpe.exit(0)
         if self.sensor_manager:
             self.sensor_manager.thread_stop()
+        for t in self.running_thread_list:
+            t.join()
         time.sleep(3)
         Log.info(f"Exiting procedure done.")
 
