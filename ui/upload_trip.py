@@ -110,6 +110,7 @@ class UploadTripDialog(QDialog):
         msgBox.exec()
 
     def accept(self):
+        self.ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         thread = threading.Thread(target=self.uploadTrips)
         helper.data_signal.connect(self.onDataSignal)
         helper.error_signal.connect(self.onErrorSignal)
