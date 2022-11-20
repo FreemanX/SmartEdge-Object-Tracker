@@ -63,19 +63,21 @@ async def list_trips():
 	resp = {"data": []}
 	for obj in meta_objects:
 		parts = obj.key.split("_")
-		if len(parts) != 5:
+		if len(parts) != 6:
 			continue # skip on unexpected filename
-		if parts[4].endswith(META_FILE_EXT) != True:
+		if parts[5].endswith(META_FILE_EXT) != True:
 			continue # skip on unexpected filename
 		# trip_name = parts[1] # just always "trip"
 		dt = parts[2]
 		lat = parts[3]
-		long = parts[4].strip(META_FILE_EXT)
+		lng = parts[4]
+		count = int(parts[5].strip(META_FILE_EXT))
 		resp["data"].append({
 			# "name": trip_name,
 			"datetime": dt,
 			"latitude": lat,
-			"longitude": long,
+			"longitude": lng,
+			"count": count,
 		})
 	return resp
 
