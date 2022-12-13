@@ -2,7 +2,7 @@
 
 ## Introduction   
 SmartEdge Tracker is a realtime GUI-based(touch monitor friendly) object tracking application developed for NVIDIA Jetson Nano. 
-This application should also work on other NVDIA Jetson devices but we haven't tested yet as we don't have other Jetson devices.
+This application should also work on other NVIDIA Jetson devices, but we haven't tested yet as we don't have other Jetson devices.
 For this particular project, we used the dataset from [Kaggle](https://www.kaggle.com/competitions/tensorflow-great-barrier-reef) and trained a `yolov5n`(YOLOv5 v6.0) model detecting Crown-of-Throns Starfish(COTS). 
 We also added a SORT object tracker to track and count the number of COTS.
 
