@@ -1,4 +1,4 @@
-# SmartEdge Tracker    
+# SmartEdge Object Tracker    
 
 ## Introduction   
 SmartEdge Tracker is a realtime GUI-based(touch monitor friendly) object tracking application developed for NVIDIA Jetson Nano. 
