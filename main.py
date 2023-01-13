@@ -380,7 +380,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
         font = msg.font()
-        font.setPointSize(50)
+        font.setPointSize(20)
         msg.setFont(font)
         ret = msg.exec_()
         msg.setStyleSheet("")
