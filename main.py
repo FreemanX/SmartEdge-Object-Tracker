@@ -22,6 +22,9 @@ from sensor.SensorManager import SensorManager
 from ui.new_trip import NewTripDialog
 from ui.upload_trip import UploadTripDialog
 
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
+
 class Helper(QObject):
     stop_complete_signal = pyqtSignal()
 
@@ -380,7 +383,7 @@ class DetectorApp(UI.Ui_MainWindow, BufferPackedResult):
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
         font = msg.font()
-        font.setPointSize(20)
+        font.setPointSize(12)
         msg.setFont(font)
         ret = msg.exec_()
         msg.setStyleSheet("")
