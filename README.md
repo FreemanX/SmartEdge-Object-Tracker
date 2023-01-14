@@ -1,4 +1,5 @@
 # SmartEdge Object Tracker    
+This is our term project for course `COMP6733 IoT Design Studio (22T3)` @ UNSW.
 
 ## Introduction   
 SmartEdge Tracker is a realtime GUI-based(touch monitor friendly) object tracking application developed for NVIDIA Jetson Nano. 
@@ -24,6 +25,14 @@ The demo video can be downloaded from [GoogleDrive](https://drive.google.com/fil
 If the camera failed to load frames, close the app, execute
 `sudo systemctl restart nvargus-daemon`
 , and re-launch the demo script.
+
+## Compare with Google's solution
+CSIRO cooperated with Google developed a real life application in a larger scale: [Using Machine Learning to Help Protect the Great Barrier Reef in Partnership with Australia’s CSIRO](https://blog.tensorflow.org/2022/05/Kaggle-Great-Barrier-Reef-ML.html). Here's a rough comparison between our system and Google's solution(one slide extracted from our project presentation):
+<img width="1371" alt="screenRecording 2023-01-14 at 17 00 35@2x" src="https://user-images.githubusercontent.com/9710644/212458314-10bb36df-e399-475d-a334-9cb72e31fa55.png">
+
+### Professor's comment
+> I am impressed very much by the the quality of the projects. I would like to particularly highlight the following project and team. "AI On Edge: Help Protect the Great Barrier Reef" by Team SmartEdge (Members' names are omitted due to privacy concerns). The guest lecturer from CSRIO that works on the project is also very impressed by the results achieved.
+
 
 ## Reference   
 * YOLOv5: https://github.com/ultralytics/yolov5 
